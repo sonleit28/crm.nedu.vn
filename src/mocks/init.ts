@@ -1,17 +1,9 @@
 import { env } from '@shared/config/env'
 
-export async function enableMocking(): Promise<void> {
-  if (!env.ENABLE_MOCKING) return
-
+async function _startWorker(): Promise<void> {
   try {
     const { worker } = await import('./browser')
-
-    // Race against a 4s timeout so a failed SW registration never hangs app boot
-    await Promise.race([
-      worker.start({ onUnhandledRequest: 'bypass', serviceWorker: { url: '/mockServiceWorker.js' } }),
-      new Promise<void>((resolve) => setTimeout(resolve, 4000)),
-    ])
-
+    await worker.start({ onUnhandledRequest: 'bypass', serviceWorker: { url: '/mockServiceWorker.js' } })
     // eslint-disable-next-line no-console
     console.info(
       '%c[MSW] Mock enabled · persona: localStorage.setItem("mock_uid","u_founder|u_admin|u_consultant_minhtam")',
@@ -20,4 +12,14 @@ export async function enableMocking(): Promise<void> {
   } catch (e) {
     console.warn('[MSW] Worker failed to start — running without mock layer:', e)
   }
+}
+
+export async function enableMocking(): Promise<void> {
+  if (!env.ENABLE_MOCKING) return
+
+  // Hard 5 s deadline covers BOTH dynamic import hang AND worker.start() hang
+  await Promise.race([
+    _startWorker(),
+    new Promise<void>((resolve) => setTimeout(resolve, 5000)),
+  ])
 }
