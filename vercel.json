@@ -11,5 +11,12 @@
         { "key": "Cache-Control", "value": "no-cache" }
       ]
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "VITE_ENABLE_MOCKING": "true",
+      "VITE_API_URL": "http://localhost:8080",
+      "VITE_AUTH_CENTRAL_URL": "http://localhost:4000"
+    }
+  }
 }
