@@ -6,7 +6,6 @@ import { KpiCard, DeltaBadge } from '../components/KpiCard'
 import { RevenueByCourseChart } from '../components/RevenueByCourseChart'
 import { CloseRateModal } from '../components/CloseRateModal'
 import { EnrollmentModal } from '../components/EnrollmentModal'
-import { OverdueAlertBanner } from '../components/OverdueAlertBanner'
 import { Spinner } from '@shared/components/ui/Spinner'
 import { formatVND } from '@shared/utils/formatVND'
 import { useAuthStore } from '@modules/auth/stores/useAuthStore'
@@ -38,16 +37,11 @@ export function DashboardPage() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-[20px] font-bold text-text">Dashboard</h1>
+        <h1 className="text-[20px] font-bold text-text">Tổng quan</h1>
         <p className="text-[12px] text-text2 mt-0.5">
           Tổng quan hệ thống · Cập nhật theo tháng [{MONTH_LABEL}]
         </p>
       </header>
-
-      {/* Critical overdue banner */}
-      {summary.has_critical_overdue && summary.top_overdue && (
-        <OverdueAlertBanner topOverdue={summary.top_overdue} />
-      )}
 
       {/* KPI Grid — 5 cols */}
       <div className="grid grid-cols-5 gap-4">
@@ -85,7 +79,7 @@ export function DashboardPage() {
           value={String(summary.consulting_total)}
           footer={
             <span className="text-text3">
-              Tư vấn {summary.consulting_breakdown.consulting} · Follow-up {summary.consulting_breakdown.followup}
+              Tư vấn {summary.consulting_breakdown.consulting} · Theo dõi {summary.consulting_breakdown.followup}
             </span>
           }
         />

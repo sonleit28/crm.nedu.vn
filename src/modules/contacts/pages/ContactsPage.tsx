@@ -37,9 +37,9 @@ export function ContactsPage() {
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-[20px] font-bold text-text">Contacts</h1>
+          <h1 className="text-[20px] font-bold text-text">Khách hàng</h1>
           <p className="text-[12px] text-text2 mt-0.5">
-            Hồ sơ học viên · Click "Chi tiết" để xem data ẩn.
+            Hồ sơ học viên · Click "Chi tiết" để xem thêm thông tin.
           </p>
         </div>
         <Button
@@ -47,7 +47,7 @@ export function ContactsPage() {
           size="sm"
           onClick={() => setAddOpen(true)}
         >
-          ＋ Thêm Contact
+          ＋ Thêm khách hàng
         </Button>
       </header>
 

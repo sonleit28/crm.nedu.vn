@@ -43,7 +43,7 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
       <table className="w-full text-[12px]">
         <thead>
           <tr className="border-b border-border">
-            {['Tên', 'Email', 'SĐT', 'Nguồn', 'Khóa đang học', 'Thanh toán', 'Phân loại', ''].map(
+            {['Tên', 'Email', 'SĐT', 'Nguồn', 'Khóa đang học', 'Phân loại', ''].map(
               (h) => (
                 <th
                   key={h}
@@ -68,16 +68,6 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
               <td className="px-3 py-2.5 text-text2">{c.phone ?? '—'}</td>
               <td className="px-3 py-2.5 text-text2">{SOURCE_LABEL[c.source]}</td>
               <td className="px-3 py-2.5 text-text">{c.current_course ?? '—'}</td>
-              <td className="px-3 py-2.5">
-                <span
-                  className={[
-                    'inline-flex items-center px-2 py-0.5 rounded-r text-[11px] font-semibold',
-                    PAYMENT_BADGE[c.payment_status_class] ?? 'text-text3',
-                  ].join(' ')}
-                >
-                  {c.payment_status_label}
-                </span>
-              </td>
               <td className="px-3 py-2.5">
                 <TierBadge tier={c.tier} />
               </td>
