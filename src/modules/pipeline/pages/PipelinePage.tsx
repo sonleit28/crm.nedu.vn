@@ -8,11 +8,12 @@ import type { Lead, LeadStage } from '@shared/types/domain'
 
 // ─── Stage config ────────────────────────────────────────────────
 const STAGE_TABS: Array<{ key: LeadStage; label: string; icon: string; hex: string }> = [
-  { key: 'lead_new',   label: 'Lead mới',   icon: '👁',  hex: '#0EA5E9' },
-  { key: 'contacted',  label: 'Tiếp cận',   icon: '💡',  hex: '#06B6D4' },
-  { key: 'consulting', label: 'Tư vấn',     icon: '🤔',  hex: '#F59E0B' },
-  { key: 'followup',   label: 'Follow-up',  icon: '🎯',  hex: '#F97316' },
-  { key: 'closed',     label: 'Chốt đơn',  icon: '✅',  hex: '#10B981' },
+  { key: 'awareness',     label: 'Biết đến',   icon: '👁',  hex: '#6366f1' },
+  { key: 'interest',      label: 'Quan tâm',   icon: '💡',  hex: '#8b5cf6' },
+  { key: 'consideration', label: 'Cân nhắc',   icon: '🤔',  hex: '#a855f7' },
+  { key: 'intent',        label: 'Muốn mua',   icon: '🎯',  hex: '#d946ef' },
+  { key: 'enrolled',      label: 'Đã đăng ký', icon: '✅',  hex: '#10b981' },
+  { key: 'retention',     label: 'Giữ chân',   icon: '💎',  hex: '#0ea5e9' },
 ]
 
 // ─── Priority derived from lead_score ────────────────────────────

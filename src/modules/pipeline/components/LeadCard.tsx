@@ -33,7 +33,7 @@ export function LeadCard({ lead, onClick, active = false }: LeadCardProps) {
           enrolledAt={lead.enrolled_at}
           lastActionAt={lead.last_action_at}
           createdAt={lead.created_at}
-          isClosed={lead.current_stage === 'closed'}
+          isClosed={lead.current_stage === 'enrolled'}
         />
       </div>
     </button>

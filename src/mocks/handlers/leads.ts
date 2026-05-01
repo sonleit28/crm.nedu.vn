@@ -21,7 +21,7 @@ const API = `${env.API_URL}/api`
 const leads: Lead[] = [...MOCK_LEADS]
 const actions: PipelineAction[] = [...MOCK_PIPELINE_ACTIONS]
 
-const VALID_STAGES: LeadStage[] = ['lead_new', 'contacted', 'consulting', 'followup', 'closed']
+const VALID_STAGES: LeadStage[] = ['awareness', 'interest', 'consideration', 'intent', 'enrolled', 'retention']
 const VALID_ACTION_TYPES: PipelineActionType[] = ['move', 'note', 'call', 'enroll', 'sms', 'email']
 
 function nextId(prefix: string): string {
@@ -126,7 +126,7 @@ export const leadsHandlers = [
 
     lead.current_stage = toStage
     lead.last_action_at = now
-    if (toStage === 'closed' && !lead.enrolled_at) {
+    if (toStage === 'enrolled' && !lead.enrolled_at) {
       lead.enrolled_at = now
     }
 
@@ -135,7 +135,7 @@ export const leadsHandlers = [
       lead_id: id,
       from_stage: fromStage,
       to_stage: toStage,
-      action_type: toStage === 'closed' ? 'enroll' : 'move',
+      action_type: toStage === 'enrolled' ? 'enroll' : 'move',
       note: body.note,
       performed_by: performer.id,
       performed_by_name: performer.name,

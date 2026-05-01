@@ -5,11 +5,12 @@ import type { FunnelRow, LeadSourceStat, ConsultantKpi } from '@shared/types/dom
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
 const FUNNEL: FunnelRow[] = [
-  { stage: 'lead_new',   label: 'Lead mới',      count: 30, conversion_pct: 100 },
-  { stage: 'contacted',  label: 'Đã liên hệ',    count: 22, conversion_pct: 73.3 },
-  { stage: 'consulting', label: 'Đang tư vấn',   count: 16, conversion_pct: 72.7 },
-  { stage: 'followup',   label: 'Follow-up',      count: 10, conversion_pct: 62.5 },
-  { stage: 'closed',     label: 'Chốt đơn',       count: 5,  conversion_pct: 50 },
+  { stage: 'awareness',     label: 'Biết đến',   count: 35, conversion_pct: 100 },
+  { stage: 'interest',      label: 'Quan tâm',   count: 26, conversion_pct: 74.3 },
+  { stage: 'consideration', label: 'Cân nhắc',   count: 18, conversion_pct: 69.2 },
+  { stage: 'intent',        label: 'Muốn mua',   count: 11, conversion_pct: 61.1 },
+  { stage: 'enrolled',      label: 'Đã đăng ký', count: 6,  conversion_pct: 54.5 },
+  { stage: 'retention',     label: 'Giữ chân',   count: 4,  conversion_pct: 66.7 },
 ]
 
 const LEAD_SOURCE: LeadSourceStat[] = [

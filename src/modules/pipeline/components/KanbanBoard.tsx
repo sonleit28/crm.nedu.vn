@@ -10,11 +10,12 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ leads, activeLeadId, onLeadClick }: KanbanBoardProps) {
   const grouped: Record<LeadStage, Lead[]> = {
-    lead_new: [],
-    contacted: [],
-    consulting: [],
-    followup: [],
-    closed: [],
+    awareness: [],
+    interest: [],
+    consideration: [],
+    intent: [],
+    enrolled: [],
+    retention: [],
   }
   for (const l of leads) {
     grouped[l.current_stage].push(l)
@@ -23,7 +24,7 @@ export function KanbanBoard({ leads, activeLeadId, onLeadClick }: KanbanBoardPro
   return (
     <div
       className="grid gap-3"
-      style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))' }}
+      style={{ gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' }}
     >
       {STAGE_META.map((meta) => (
         <KanbanColumn
