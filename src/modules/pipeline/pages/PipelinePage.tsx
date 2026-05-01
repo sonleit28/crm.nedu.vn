@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useLeads } from '@modules/pipeline/hooks/useLeads'
 import { LeadDetailPanel } from '@modules/pipeline/components/LeadDetailPanel'
-import { LeadScoreBadge } from '@modules/pipeline/components/LeadScoreBadge'
 import { Spinner } from '@shared/components/ui/Spinner'
 import { Button } from '@shared/components/ui/Button'
 import { SOURCE_LABEL } from '@shared/utils/enums'
@@ -277,7 +276,7 @@ export function PipelinePage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                  {['', 'Tên KH', 'SĐT', 'Khóa quan tâm', 'Nguồn', 'Tư vấn viên', 'Lead score', 'Giai đoạn'].map(
+                  {['', 'Tên KH', 'SĐT', 'Khóa quan tâm', 'Nguồn', 'Tư vấn viên', 'Giai đoạn'].map(
                     (h, i) => (
                       <th
                         key={i}
@@ -303,7 +302,7 @@ export function PipelinePage() {
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: 13 }}>
+                    <td colSpan={7} style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontSize: 13 }}>
                       Không có lead nào khớp bộ lọc.
                     </td>
                   </tr>
@@ -391,10 +390,6 @@ function LeadRow({
       {/* Consultant */}
       <td style={{ padding: '10px 14px', color: '#cbd5e1', whiteSpace: 'nowrap' }}>
         {lead.assigned_to_name ?? '—'}
-      </td>
-      {/* Lead score badge */}
-      <td style={{ padding: '10px 14px' }}>
-        <LeadScoreBadge score={lead.lead_score} />
       </td>
       {/* Stage badge */}
       <td style={{ padding: '10px 14px' }}>
