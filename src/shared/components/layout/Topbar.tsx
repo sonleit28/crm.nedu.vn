@@ -1,12 +1,11 @@
 import { useLocation } from 'react-router-dom'
 
 const PAGE_META: Record<string, { title: string; breadcrumb: string }> = {
-  '/dashboard': { title: 'Dashboard', breadcrumb: 'Tổng quan / Dashboard' },
-  '/pipeline': { title: 'Pipeline Kanban', breadcrumb: 'Tổng quan / Pipeline' },
-  '/contacts': { title: 'Contacts', breadcrumb: 'Tổng quan / Contacts' },
-  '/finance': { title: 'Tài chính', breadcrumb: 'Tài chính / Tổng quan' },
-  '/overdue': { title: 'Thanh toán quá hạn', breadcrumb: 'Tài chính / Quá hạn' },
-  '/analytics': { title: 'Analytics', breadcrumb: 'Phân tích / Analytics' },
+  '/dashboard': { title: 'Tổng quan',    breadcrumb: 'Quản lý / Tổng quan' },
+  '/pipeline':  { title: 'Tư vấn',       breadcrumb: 'Quản lý / Tư vấn' },
+  '/contacts':  { title: 'Khách hàng',   breadcrumb: 'Quản lý / Khách hàng' },
+  '/finance':   { title: 'Tài chính',    breadcrumb: 'Tài chính / Tổng quan' },
+  '/analytics': { title: 'Phân tích',    breadcrumb: 'Phân tích / Báo cáo' },
 }
 
 export function Topbar() {
