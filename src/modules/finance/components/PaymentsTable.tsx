@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import type { Payment } from '@shared/types/domain'
 import { PaymentStatusBadge } from './PaymentStatusBadge'
 import { formatVND } from '@shared/utils/formatVND'
@@ -25,8 +24,6 @@ interface PaymentsTableProps {
 }
 
 export function PaymentsTable({ payments, isLoading }: PaymentsTableProps) {
-  const navigate = useNavigate()
-
   if (isLoading) {
     return (
       <div className="py-16 grid place-items-center">
@@ -50,7 +47,7 @@ export function PaymentsTable({ payments, isLoading }: PaymentsTableProps) {
       <table className="w-full text-[12px]">
         <thead>
           <tr className="border-b border-border">
-            {['Học viên', 'Khóa', 'Số tiền', 'Phương thức', 'Trạng thái', 'Ngày', 'Gateway'].map(
+            {['Học viên', 'Khóa', 'Số tiền', 'Phương thức', 'Trạng thái', 'Ngày', 'Cổng thanh toán'].map(
               (h) => (
                 <th
                   key={h}
@@ -66,13 +63,7 @@ export function PaymentsTable({ payments, isLoading }: PaymentsTableProps) {
           {payments.map((p) => (
             <tr
               key={p.id}
-              onClick={p.status === 'overdue' ? () => navigate(`/overdue`) : undefined}
-              className={[
-                'border-b border-border/50 transition-colors',
-                p.status === 'overdue'
-                  ? 'bg-red/[0.04] hover:bg-red/[0.07] cursor-pointer'
-                  : 'hover:bg-card2/50',
-              ].join(' ')}
+              className="border-b border-border/50 transition-colors hover:bg-card2/50"
             >
               <td className="px-3 py-2.5 font-semibold text-text">{p.contact_name}</td>
               <td className="px-3 py-2.5 text-text2">{p.course_name}</td>

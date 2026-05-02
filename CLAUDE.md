@@ -42,7 +42,7 @@ Theo `architecture.md` (NLH frontend portal template):
 | Auth         | **Central Auth** `auth-central` (NLH-CORE) | Google OAuth → JWT → `localStorage`.                        |
 | Realtime     | **SSE** (`EventSource`)         | Channel `/api/sse/overdue` cho toast quá hạn.               |
 | Charts       | **Tự render bằng SVG/CSS**      | Không thêm chart lib ở Phase 1 — bar chart đơn giản dùng div%. |
-| Deploy       | **Vercel**                      | SPA rewrite trong `vercel.json`.                            |
+| Deploy       | **Cloudflare Workers** (assets-only SPA) | `@cloudflare/vite-plugin` + `wrangler.jsonc`. 2 env: `dev` (`nedu-crm-dev`) và `production` (`nedu-crm-prod`). |
 
 ### Font (exception so với Master Prompt PROMPT-BUILD-001)
 
@@ -1252,7 +1252,7 @@ Module quan trọng nhất — consultant phải dùng được trong tuần đ�
 - [ ] Keyboard support: Modal ESC, Tabs arrow keys, Table row Enter để mở detail.
 - [ ] Accessibility cơ bản: focus ring, aria-label cho icon buttons, role="dialog" cho modal.
 - [ ] Switch mode: set `VITE_ENABLE_MOCKING=false` → integrate `api.nedu.vn` thật (nếu IT đã ready). Fix mismatch envelope nếu có.
-- [ ] Build + deploy Vercel: `npm run build` (tsc -b && vite build pass), config env biến trên Vercel (`VITE_API_URL=https://api.nedu.vn`, `VITE_AUTH_CENTRAL_URL=https://auth-central.vn`, `VITE_ENABLE_MOCKING=false`), DNS `crm.nedu.vn` → Vercel.
+- [ ] Build + deploy Cloudflare Workers (xem section 13 — Deploy flow): `npm run deploy:dev` → smoke test ở `nedu-crm-dev.workers.dev`, sau đó `npm run deploy:prod` → smoke test ở `nedu-crm-prod.workers.dev`. Sau khi 2 env chạy được mới lên dashboard Cloudflare cấu hình GitHub repo + branch + env vars + custom domain `crm.nedu.vn`.
 - [ ] Smoke test prod: login Google → dashboard load → mỗi module đi qua được.
 
 ### Phase 2 backlog (sau launch)
@@ -1282,9 +1282,10 @@ VITE_AUTH_CENTRAL_URL=http://localhost:4000
 VITE_ENABLE_MOCKING=true
 ```
 
-Vercel env:
-- Production: `VITE_API_URL=https://api.nedu.vn`, `VITE_AUTH_CENTRAL_URL=https://auth-central.vn` (hoặc tương đương domain prod), `VITE_ENABLE_MOCKING=false`.
-- Preview: cùng prod nhưng có thể trỏ tới staging API.
+Cloudflare Workers env (cấu hình trên dashboard sau lần deploy đầu — xem section 13):
+- `production` (`nedu-crm-prod`): `VITE_API_URL=https://api.nedu.vn`, `VITE_AUTH_CENTRAL_URL=https://auth-central.vn` (hoặc domain prod tương đương), `VITE_ENABLE_MOCKING=false`.
+- `dev` (`nedu-crm-dev`): trỏ tới staging API; `VITE_ENABLE_MOCKING=false` (mock chỉ chạy ở `npm run dev` local).
+- Build-time vars: cấu hình ở Cloudflare → Workers → Settings → Variables and Secrets (build vars). Cũng có thể inline qua `.env.production` / `.env.development` ở local nếu muốn deploy thủ công.
 
 LocalStorage keys (dùng chung toàn NLH):
 - `nlh_access_token` — JWT access (~15min TTL)
@@ -1325,6 +1326,71 @@ Khi nghi ngờ:
 - Convention → mở architecture.md
 - Acceptance criteria → mở crm-nedu_UserStory.docx
 ```
+
+---
+
+## 13. Deploy lên Cloudflare Workers
+
+> Stack: Vite + `@cloudflare/vite-plugin` (build ra `dist/` + auto-generate `dist/wrangler.json`) + `wrangler` CLI. Cùng flow với `hieucon.vn` (Next.js qua OpenNext) — chỉ khác build adapter.
+
+### 13.1 Lần đầu deploy (làm 1 lần ở local)
+
+Trước khi cấu hình GitHub auto-deploy trên Cloudflare dashboard, **luôn deploy thủ công từ máy local** để verify cả 2 environment chạy được.
+
+```bash
+# 1. Login Cloudflare CLI (chỉ chạy 1 lần / 1 máy — mở browser xác thực)
+npx wrangler login
+
+# 2. Verify đã login đúng account
+npx wrangler whoami
+
+# 3. Deploy environment dev → tạo Worker `nedu-crm-dev`
+npm run deploy:dev
+# → mở https://nedu-crm-dev.<account>.workers.dev và smoke test
+
+# 4. Deploy environment production → tạo Worker `nedu-crm-prod`
+npm run deploy:prod
+# → mở https://nedu-crm-prod.<account>.workers.dev và smoke test
+```
+
+Sau bước này, 2 Worker đã tồn tại trên Cloudflare account → đủ điều kiện để gắn vào GitHub repo và custom domain.
+
+### 13.2 Cấu hình tiếp trên Cloudflare dashboard (sau khi deploy local OK)
+
+Vào dashboard Cloudflare → **Workers & Pages** → chọn từng Worker (`nedu-crm-dev`, `nedu-crm-prod`) và cấu hình:
+
+1. **Source · Connect to Git**
+   - Connect GitHub repo `nedu-crm` (hoặc tên repo tương ứng).
+   - `nedu-crm-dev`: branch `develop` (hoặc `staging`) → auto deploy mỗi khi push.
+   - `nedu-crm-prod`: branch `main` → auto deploy mỗi khi push.
+   - Build command: `npm run build` (vì `@cloudflare/vite-plugin` đã sinh `dist/wrangler.json`).
+   - Deploy command: `npx wrangler deploy --env dev` (hoặc `--env production`).
+
+2. **Settings · Variables and Secrets** (build-time + runtime nếu cần)
+   - `VITE_API_URL` — `https://api.nedu.vn` (prod) / staging URL (dev).
+   - `VITE_AUTH_CENTRAL_URL` — URL `auth-central` tương ứng env.
+   - `VITE_ENABLE_MOCKING` — `false` cho cả 2 env (mock chỉ chạy ở `npm run dev`).
+   - Secret (nếu có) → mark là Secret, không để plaintext.
+
+3. **Settings · Domains & Routes**
+   - `nedu-crm-prod`: gắn custom domain `crm.nedu.vn` (DNS có sẵn ở Cloudflare → 1-click).
+   - `nedu-crm-dev`: gắn `crm-dev.nedu.vn` (hoặc giữ subdomain `*.workers.dev` nếu chỉ team IT dùng).
+
+4. **(Tùy chọn) Settings · Build · Watch paths** — nếu repo monorepo, cấu hình watch chỉ thư mục `crm.nedu.vn/**` để tránh build trùng.
+
+### 13.3 Sau lần đầu — flow hằng ngày
+
+- Push lên branch tương ứng → Cloudflare auto build + deploy.
+- Cần redeploy thủ công (rollback / debug) → vẫn chạy được `npm run deploy:dev` / `npm run deploy:prod` từ local (login token vẫn còn).
+- Thay đổi `wrangler.jsonc` (thêm binding R2/KV/Durable Object) → phải deploy local 1 lần để test trước, rồi mới merge.
+
+### 13.4 Các quy tắc
+
+- **Không** tự ý đổi `name` / env name trong `wrangler.jsonc` (đã pin `nedu-crm`, `nedu-crm-dev`, `nedu-crm-prod`).
+- **Không** commit `.wrangler/` (đã `.gitignore`) — đó là local state.
+- File `vercel.json` **giữ lại** — team vibe coding (non-IT) deploy nhánh prototype của họ lên Vercel song song; CRM portal chính chạy trên Cloudflare nhưng config Vercel SPA rewrite + MSW headers vẫn cần cho luồng vibe coding. Không xoá.
+- SPA fallback đã handle qua `assets.not_found_handling: "single-page-application"` trong `wrangler.jsonc` — không cần worker code custom.
+- MSW (`mockServiceWorker.js`) chỉ active khi `VITE_ENABLE_MOCKING=true` ở build time → prod không phục vụ mock dù file vẫn nằm trong assets.
 
 ---
 

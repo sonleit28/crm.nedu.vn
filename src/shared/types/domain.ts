@@ -1,10 +1,11 @@
 // ─── Enums (string literal unions) ─────────────────────────────
 export type LeadStage =
-  | 'lead_new'
-  | 'contacted'
-  | 'consulting'
-  | 'followup'
-  | 'closed'
+  | 'awareness'
+  | 'interest'
+  | 'consideration'
+  | 'intent'
+  | 'enrolled'
+  | 'retention'
 
 export type LeadSource =
   | 'facebook_ads'

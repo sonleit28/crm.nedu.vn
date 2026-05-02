@@ -7,9 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "msw:init": "msw init public/ --save"
+    "msw:init": "msw init public/ --save",
+    "cf:build": "tsc -b && vite build",
+    "deploy:dev": "npm run build && wrangler deploy --env dev",
+    "deploy:prod": "npm run build && wrangler deploy --env production",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
+    "@cloudflare/vite-plugin": "^1.35.0",
     "@tanstack/react-query": "^5.62.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -24,9 +29,12 @@
     "msw": "^2.7.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "wrangler": "^4.87.0"
   },
   "msw": {
-    "workerDirectory": ["public"]
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

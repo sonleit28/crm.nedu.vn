@@ -1,6 +1,5 @@
 import { SidebarNavItem } from './SidebarNavItem'
 import { useAuthStore } from '@modules/auth/stores/useAuthStore'
-import { useOverdueBadgeStore } from '@shared/stores/useOverdueBadgeStore'
 import { logoutFromCentral } from '@shared/config/auth-central-client'
 import { useNavigate } from 'react-router-dom'
 
@@ -17,7 +16,6 @@ function NavSection({ title, children }: { title: string; children: React.ReactN
 
 export function Sidebar() {
   const user = useAuthStore((s) => s.user)
-  const overdueCount = useOverdueBadgeStore((s) => s.count)
   const navigate = useNavigate()
 
   const isAdminOrFounder = user?.role === 'admin' || user?.role === 'founder'
@@ -63,27 +61,21 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-2 pb-4">
-        <NavSection title="Tổng quan">
-          <SidebarNavItem to="/dashboard" icon="📊" label="Dashboard" />
-          <SidebarNavItem to="/pipeline" icon="🔀" label="Pipeline" />
-          <SidebarNavItem to="/contacts" icon="👥" label="Contacts" />
-        </NavSection>
-
-        <NavSection title="Tài chính">
-          {isAdminOrFounder && (
-            <SidebarNavItem to="/finance" icon="💰" label="Tổng quan" />
-          )}
-          <SidebarNavItem
-            to="/overdue"
-            icon="🔴"
-            label="Quá hạn"
-            badge={overdueCount}
-          />
+        <NavSection title="Quản lý">
+          <SidebarNavItem to="/dashboard" icon="📊" label="Tổng quan" />
+          <SidebarNavItem to="/pipeline" icon="🔀" label="Tư vấn" />
+          <SidebarNavItem to="/contacts" icon="👥" label="Khách hàng" />
         </NavSection>
 
         {isAdminOrFounder && (
+          <NavSection title="Tài chính">
+            <SidebarNavItem to="/finance" icon="💰" label="Tài chính" />
+          </NavSection>
+        )}
+
+        {isAdminOrFounder && (
           <NavSection title="Phân tích">
-            <SidebarNavItem to="/analytics" icon="📈" label="Analytics" />
+            <SidebarNavItem to="/analytics" icon="📈" label="Phân tích" />
           </NavSection>
         )}
       </nav>
