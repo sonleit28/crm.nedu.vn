@@ -42,7 +42,7 @@ Theo `architecture.md` (NLH frontend portal template):
 | Auth         | **Central Auth** `auth-central` (NLH-CORE) | Google OAuth → JWT → `localStorage`.                        |
 | Realtime     | **SSE** (`EventSource`)         | Channel `/api/sse/overdue` cho toast quá hạn.               |
 | Charts       | **Tự render bằng SVG/CSS**      | Không thêm chart lib ở Phase 1 — bar chart đơn giản dùng div%. |
-| Deploy       | **Cloudflare Workers** (assets-only SPA) | `@cloudflare/vite-plugin` + `wrangler.jsonc`. 2 env: `dev` (`nedu-crm-dev`) và `production` (`nedu-crm-prod`). |
+| Deploy       | **Cloudflare Workers** (assets-only SPA) | `@cloudflare/vite-plugin` + `wrangler.jsonc`. 2 worker tách bằng `--name` flag: `nedu-crm-dev` (script `deploy:dev`) và `nedu-crm-prod` (script `deploy:prod`). |
 
 ### Font (exception so với Master Prompt PROMPT-BUILD-001)
 
@@ -1331,7 +1331,9 @@ Khi nghi ngờ:
 
 ## 13. Deploy lên Cloudflare Workers
 
-> Stack: Vite + `@cloudflare/vite-plugin` (build ra `dist/` + auto-generate `dist/wrangler.json`) + `wrangler` CLI. Cùng flow với `hieucon.vn` (Next.js qua OpenNext) — chỉ khác build adapter.
+> Stack: Vite + `@cloudflare/vite-plugin` (build ra `dist/` + auto-generate `dist/wrangler.json`) + `wrangler` CLI. Cùng flow với `hieucon.vn` (Next.js qua OpenNext) — chỉ khác build adapter. Reference đầy đủ: [`/DEPLOY-CLOUDFLARE.md`](../../DEPLOY-CLOUDFLARE.md).
+>
+> **Quan trọng:** Worker name trên CF = top-level `name` trong `wrangler.jsonc` (`nedu-crm`). Để có 2 worker tách biệt cho dev / prod, scripts dùng `--name nedu-crm-dev` và `--name nedu-crm-prod` để override khi deploy. **Không** dùng `env.<env>.name` block — wrangler/vite-plugin không apply field đó khi deploy.
 
 ### 13.1 Lần đầu deploy (làm 1 lần ở local)
 
@@ -1364,7 +1366,7 @@ Vào dashboard Cloudflare → **Workers & Pages** → chọn từng Worker (`ned
    - `nedu-crm-dev`: branch `develop` (hoặc `staging`) → auto deploy mỗi khi push.
    - `nedu-crm-prod`: branch `main` → auto deploy mỗi khi push.
    - Build command: `npm run build` (vì `@cloudflare/vite-plugin` đã sinh `dist/wrangler.json`).
-   - Deploy command: `npx wrangler deploy --env dev` (hoặc `--env production`).
+   - Deploy command: `npx wrangler deploy --name nedu-crm-dev` (hoặc `--name nedu-crm-prod` cho worker prod).
 
 2. **Settings · Variables and Secrets** (build-time + runtime nếu cần)
    - `VITE_API_URL` — `https://api.nedu.vn` (prod) / staging URL (dev).
@@ -1386,7 +1388,7 @@ Vào dashboard Cloudflare → **Workers & Pages** → chọn từng Worker (`ned
 
 ### 13.4 Các quy tắc
 
-- **Không** tự ý đổi `name` / env name trong `wrangler.jsonc` (đã pin `nedu-crm`, `nedu-crm-dev`, `nedu-crm-prod`).
+- **Không** tự ý đổi `name` trong `wrangler.jsonc` (top-level đã pin `nedu-crm`). Tên worker dev/prod (`nedu-crm-dev`, `nedu-crm-prod`) được tách qua `--name` flag trong package.json scripts — không phải env block.
 - **Không** commit `.wrangler/` (đã `.gitignore`) — đó là local state.
 - File `vercel.json` **giữ lại** — team vibe coding (non-IT) deploy nhánh prototype của họ lên Vercel song song; CRM portal chính chạy trên Cloudflare nhưng config Vercel SPA rewrite + MSW headers vẫn cần cho luồng vibe coding. Không xoá.
 - SPA fallback đã handle qua `assets.not_found_handling: "single-page-application"` trong `wrangler.jsonc` — không cần worker code custom.
