@@ -4,5 +4,13 @@
 	"compatibility_date": "2026-04-01",
 	"assets": {
 		"not_found_handling": "single-page-application"
+	},
+	"env": {
+		"production": {
+			"name": "nedu-crm-prod"
+		},
+		"dev": {
+			"name": "nedu-crm-dev"
+		}
 	}
 }

@@ -1333,7 +1333,7 @@ Khi nghi ngờ:
 
 > Stack: Vite + `@cloudflare/vite-plugin` (build ra `dist/` + auto-generate `dist/wrangler.json`) + `wrangler` CLI. Cùng flow với `hieucon.vn` (Next.js qua OpenNext) — chỉ khác build adapter. Reference đầy đủ: [`/DEPLOY-CLOUDFLARE.md`](../../DEPLOY-CLOUDFLARE.md).
 >
-> **Quan trọng:** Worker name trên CF = top-level `name` trong `wrangler.jsonc` (`nedu-crm`). Để có 2 worker tách biệt cho dev / prod, scripts dùng `--name nedu-crm-dev` và `--name nedu-crm-prod` để override khi deploy. **Không** dùng `env.<env>.name` block — wrangler/vite-plugin không apply field đó khi deploy.
+> **Quan trọng:** Worker name **thực tế** trên CF = top-level `name` trong `wrangler.jsonc` (`nedu-crm`). Block `env.{dev,production}.name` (`nedu-crm-dev` / `nedu-crm-prod`) giữ trong file làm **declaration / reference** cho slug worker mong muốn, nhưng wrangler/vite-plugin không apply field đó. Việc tách 2 worker dev/prod thực sự dựa vào `--name nedu-crm-dev` và `--name nedu-crm-prod` ở `deploy:dev` / `deploy:prod` scripts.
 
 ### 13.1 Lần đầu deploy (làm 1 lần ở local)
 
@@ -1388,7 +1388,7 @@ Vào dashboard Cloudflare → **Workers & Pages** → chọn từng Worker (`ned
 
 ### 13.4 Các quy tắc
 
-- **Không** tự ý đổi `name` trong `wrangler.jsonc` (top-level đã pin `nedu-crm`). Tên worker dev/prod (`nedu-crm-dev`, `nedu-crm-prod`) được tách qua `--name` flag trong package.json scripts — không phải env block.
+- **Không** tự ý đổi `name` trong `wrangler.jsonc` (top-level đã pin `nedu-crm`; env block `nedu-crm-dev` / `nedu-crm-prod` giữ làm declaration). Worker dev/prod thực tế được tách qua `--name` flag trong package.json scripts.
 - **Không** commit `.wrangler/` (đã `.gitignore`) — đó là local state.
 - File `vercel.json` **giữ lại** — team vibe coding (non-IT) deploy nhánh prototype của họ lên Vercel song song; CRM portal chính chạy trên Cloudflare nhưng config Vercel SPA rewrite + MSW headers vẫn cần cho luồng vibe coding. Không xoá.
 - SPA fallback đã handle qua `assets.not_found_handling: "single-page-application"` trong `wrangler.jsonc` — không cần worker code custom.
