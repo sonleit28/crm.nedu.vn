@@ -11,13 +11,6 @@ interface ContactsTableProps {
   onDetail: (id: string) => void
 }
 
-const PAYMENT_BADGE: Record<string, string> = {
-  paid: 'bg-mint/10 text-mint border border-mint/30',
-  completed: 'bg-mint/10 text-mint border border-mint/30',
-  pending: 'bg-amber/10 text-amber border border-amber/30',
-  overdue: 'bg-red/10 text-red border border-red/30',
-  refunded: 'bg-muted/10 text-text2 border border-border',
-}
 
 export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTableProps) {
   if (isLoading) {
@@ -43,7 +36,7 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
       <table className="w-full text-[12px]">
         <thead>
           <tr className="border-b border-border">
-            {['Tên', 'Email', 'SĐT', 'Nguồn', 'Khóa đang học', 'Thanh toán', 'Phân loại', ''].map(
+            {['Tên', 'Email', 'SĐT', 'Nguồn', 'Khóa đang học', 'Phân loại', ''].map(
               (h) => (
                 <th
                   key={h}
@@ -68,16 +61,6 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
               <td className="px-3 py-2.5 text-text2">{c.phone ?? '—'}</td>
               <td className="px-3 py-2.5 text-text2">{SOURCE_LABEL[c.source]}</td>
               <td className="px-3 py-2.5 text-text">{c.current_course ?? '—'}</td>
-              <td className="px-3 py-2.5">
-                <span
-                  className={[
-                    'inline-flex items-center px-2 py-0.5 rounded-r text-[11px] font-semibold',
-                    PAYMENT_BADGE[c.payment_status_class] ?? 'text-text3',
-                  ].join(' ')}
-                >
-                  {c.payment_status_label}
-                </span>
-              </td>
               <td className="px-3 py-2.5">
                 <TierBadge tier={c.tier} />
               </td>

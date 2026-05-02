@@ -66,9 +66,9 @@ export function StageMoveDialog({
             rows={3}
           />
         </div>
-        {toStage === 'closed' && (
+        {toStage === 'enrolled' && (
           <div className="text-[11px] bg-mint/10 border border-mint/30 rounded-r p-2 text-mint">
-            ✅ Đóng deal → backend sẽ tự sinh contact + payment skeleton.
+            ✅ Đã đăng ký → backend sẽ tự sinh contact + payment skeleton.
           </div>
         )}
       </ModalBody>

@@ -12,7 +12,6 @@ const COURSE_OPTIONS = [
 const STATUS_OPTIONS = [
   { value: 'completed', label: '✓ Hoàn thành' },
   { value: 'pending', label: '⏳ Đang chờ' },
-  { value: 'overdue', label: '🔴 Quá hạn' },
   { value: 'refunded', label: '↩ Hoàn tiền' },
 ]
 

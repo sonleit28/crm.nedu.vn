@@ -7,7 +7,7 @@ interface FinanceKpiGridProps {
 
 export function FinanceKpiGrid({ summary }: FinanceKpiGridProps) {
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-3 gap-4">
       <KpiCard
         icon="💰"
         label="Tổng thu tháng"
@@ -29,13 +29,6 @@ export function FinanceKpiGrid({ summary }: FinanceKpiGridProps) {
         value={formatVND(summary.receivable_vnd)}
         valueColor="text-amber"
         footer={<span className="text-text3">{summary.receivable_count} học viên</span>}
-      />
-      <KpiCard
-        icon="🔴"
-        label="Quá hạn"
-        value={formatVND(summary.overdue_vnd)}
-        valueColor={summary.overdue_count > 0 ? 'text-red' : 'text-text3'}
-        footer={<span className="text-text3">{summary.overdue_count} học viên</span>}
       />
     </div>
   )

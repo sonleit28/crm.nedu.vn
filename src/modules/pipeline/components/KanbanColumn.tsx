@@ -9,31 +9,15 @@ interface KanbanColumnProps {
   onLeadClick: (lead: Lead) => void
 }
 
-const HEADER_BG: Record<StageMeta['color'], string> = {
-  accent: 'bg-accent',
-  teal: 'bg-teal',
-  amber: 'bg-amber',
-  coral: 'bg-coral',
-  mint: 'bg-mint',
-}
-
 export function KanbanColumn({ meta, leads, activeLeadId, onLeadClick }: KanbanColumnProps) {
   return (
     <section className="flex flex-col min-w-0" aria-label={`Cột ${meta.label}`}>
       <div
-        className={[
-          HEADER_BG[meta.color],
-          'flex items-center justify-between rounded-t-r px-3 py-2 font-bold text-[12px]',
-          meta.headerTextDark ? 'text-bg' : 'text-white',
-        ].join(' ')}
+        className="flex items-center justify-between rounded-t-r px-3 py-2 font-bold text-[12px] text-white"
+        style={{ backgroundColor: meta.hex }}
       >
         <span>{meta.label}</span>
-        <span
-          className={[
-            'min-w-[20px] text-center text-[11px] font-bold rounded',
-            meta.headerTextDark ? 'bg-black/15' : 'bg-white/20',
-          ].join(' ')}
-        >
+        <span className="min-w-[20px] text-center text-[11px] font-bold rounded bg-white/20">
           {leads.length}
         </span>
       </div>

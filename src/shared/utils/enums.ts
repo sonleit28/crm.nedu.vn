@@ -16,18 +16,16 @@ export const SOURCE_LABEL: Record<LeadSource, string> = {
 export interface StageMeta {
   key: LeadStage
   label: string
-  /** Tailwind color token used for header bg (matches CSS var) */
-  color: 'accent' | 'teal' | 'amber' | 'coral' | 'mint'
-  /** Header text color: white for dark headers, dark navy for bright headers */
-  headerTextDark: boolean
+  hex: string
 }
 
 export const STAGE_META: ReadonlyArray<StageMeta> = [
-  { key: 'lead_new', label: 'Lead mới', color: 'accent', headerTextDark: false },
-  { key: 'contacted', label: 'Tiếp cận', color: 'teal', headerTextDark: false },
-  { key: 'consulting', label: 'Tư vấn', color: 'amber', headerTextDark: true },
-  { key: 'followup', label: 'Follow-up', color: 'coral', headerTextDark: false },
-  { key: 'closed', label: 'Chốt đơn', color: 'mint', headerTextDark: true },
+  { key: 'awareness',     label: 'Biết đến',   hex: '#6366f1' },
+  { key: 'interest',      label: 'Quan tâm',   hex: '#8b5cf6' },
+  { key: 'consideration', label: 'Cân nhắc',   hex: '#a855f7' },
+  { key: 'intent',        label: 'Muốn mua',   hex: '#d946ef' },
+  { key: 'enrolled',      label: 'Đã đăng ký', hex: '#10b981' },
+  { key: 'retention',     label: 'Giữ chân',   hex: '#0ea5e9' },
 ] as const
 
 export const STAGE_LABEL: Record<LeadStage, string> = STAGE_META.reduce(
