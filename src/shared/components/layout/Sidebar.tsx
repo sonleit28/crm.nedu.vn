@@ -18,24 +18,35 @@ export function Sidebar() {
   const user = useAuthStore((s) => s.user)
   const navigate = useNavigate()
 
-  const isAdminOrFounder = user?.role === 'admin' || user?.role === 'founder'
+  const userRoles = user?.roles ?? []
+  const isAdminOrFounder = userRoles.some(
+    (r) => r === 'admin' || r === 'founder' || r === 'owner',
+  )
 
-  const initials = user?.name
-    ?.split(' ')
-    .map((p) => p[0])
-    .filter(Boolean)
-    .slice(-2)
-    .join('')
-    .toUpperCase() ?? '?'
+  const initials =
+    user?.full_name
+      ?.split(' ')
+      .map((p) => p[0])
+      .filter(Boolean)
+      .slice(-2)
+      .join('')
+      .toUpperCase() ?? '?'
 
-  const roleLabel =
-    user?.role === 'founder'
-      ? 'Founder'
-      : user?.role === 'admin'
+  // Highest-tier label nếu user nhiều roles (vd 'iam_manager' + 'admin'
+  // → hiển thị 'Admin'). Priority: founder > owner > admin > leader > consultant.
+  const roleLabel = userRoles.includes('founder')
+    ? 'Founder'
+    : userRoles.includes('owner')
+      ? 'Owner'
+      : userRoles.includes('admin')
         ? 'Admin'
-        : user?.role === 'consultant'
-          ? 'Sale viên'
-          : ''
+        : userRoles.includes('leader')
+          ? 'Leader'
+          : userRoles.includes('consultant')
+            ? 'Sale viên'
+            : userRoles[0] // fallback hiển thị role đầu tiên (vd 'iam_manager')
+              ? userRoles[0].charAt(0).toUpperCase() + userRoles[0].slice(1)
+              : ''
 
   const handleLogout = async () => {
     await logoutFromCentral()
@@ -86,7 +97,7 @@ export function Sidebar() {
           {initials}
         </div>
         <div className="flex-1 min-w-0 leading-tight">
-          <div className="text-[12px] font-semibold text-text truncate">{user?.name ?? '—'}</div>
+          <div className="text-[12px] font-semibold text-text truncate">{user?.full_name ?? '—'}</div>
           <div className="text-[10px] text-text3 truncate">{roleLabel}</div>
         </div>
         <button

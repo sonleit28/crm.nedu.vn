@@ -14,8 +14,10 @@ const MONTH = '2026-04'
 const MONTH_LABEL = '04/2026'
 
 export function DashboardPage() {
-  const role = useAuthStore((s) => s.user?.role)
-  const isAdmin = role === 'founder' || role === 'admin'
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = !!user?.roles?.some(
+    (r) => r === 'founder' || r === 'admin' || r === 'owner',
+  )
 
   const { data: summary, isLoading } = useDashboardSummary(MONTH)
   const { data: closeRate } = useCloseRateByCourse(MONTH)

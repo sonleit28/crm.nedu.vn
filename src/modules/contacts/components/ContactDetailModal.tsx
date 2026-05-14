@@ -14,8 +14,10 @@ interface ContactDetailModalProps {
 
 export function ContactDetailModal({ contactId, onClose }: ContactDetailModalProps) {
   const { data: contact, isLoading } = useContact(contactId)
-  const role = useAuthStore((s) => s.user?.role)
-  const isAdmin = role === 'founder' || role === 'admin'
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = !!user?.roles?.some(
+    (r) => r === 'founder' || r === 'admin' || r === 'owner',
+  )
 
   const paymentBadgeCls = {
     paid: 'bg-mint/10 text-mint border border-mint/30',
