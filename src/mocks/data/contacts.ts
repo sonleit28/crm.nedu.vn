@@ -7,7 +7,7 @@ export interface MockContactDetail extends ContactDetail {
 export const MOCK_CONTACTS: MockContactDetail[] = [
   {
     id: 'ct_lan',
-    name: 'Nguyễn Thị Lan',
+    full_name: 'Nguyễn Thị Lan',
     email: 'lan.nguyen@gmail.com',
     phone: '0901234567',
     source: 'facebook_ads',
@@ -29,7 +29,7 @@ export const MOCK_CONTACTS: MockContactDetail[] = [
   },
   {
     id: 'ct_minh',
-    name: 'Trần Văn Minh',
+    full_name: 'Trần Văn Minh',
     email: 'minh.tran@gmail.com',
     phone: '0912345678',
     source: 'referral',
@@ -51,7 +51,7 @@ export const MOCK_CONTACTS: MockContactDetail[] = [
   },
   {
     id: 'ct_phuc',
-    name: 'Lê Văn Phúc',
+    full_name: 'Lê Văn Phúc',
     email: 'phuc.le@gmail.com',
     phone: '0923456789',
     source: 'google',
@@ -70,7 +70,7 @@ export const MOCK_CONTACTS: MockContactDetail[] = [
   },
   {
     id: 'ct_ha',
-    name: 'Phạm Thị Hà',
+    full_name: 'Phạm Thị Hà',
     email: 'ha.pham@gmail.com',
     phone: '0934567890',
     source: 'webinar',
@@ -89,7 +89,7 @@ export const MOCK_CONTACTS: MockContactDetail[] = [
   },
   {
     id: 'ct_dung',
-    name: 'Hoàng Văn Dũng',
+    full_name: 'Hoàng Văn Dũng',
     email: 'dung.hoang@gmail.com',
     phone: '0945678901',
     source: 'tiktok',
@@ -108,7 +108,7 @@ export const MOCK_CONTACTS: MockContactDetail[] = [
   },
   {
     id: 'ct_mai',
-    name: 'Trần Thị Mai',
+    full_name: 'Trần Thị Mai',
     email: 'mai.tran@gmail.com',
     phone: '0956789012',
     source: 'organic',
@@ -129,7 +129,7 @@ export const MOCK_CONTACTS: MockContactDetail[] = [
   },
   {
     id: 'ct_tuan',
-    name: 'Nguyễn Văn Tuấn',
+    full_name: 'Nguyễn Văn Tuấn',
     email: 'tuan.nguyen@gmail.com',
     phone: '0967890123',
     source: 'facebook_ads',

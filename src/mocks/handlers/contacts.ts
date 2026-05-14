@@ -15,7 +15,7 @@ function isAdmin(uid: string | null) {
 function toSummary(c: (typeof MOCK_CONTACTS)[number]): ContactSummary {
   return {
     id: c.id,
-    name: c.name,
+    full_name: c.full_name,
     email: c.email,
     phone: c.phone,
     source: c.source,
@@ -35,7 +35,7 @@ function toDetail(
 
   return {
     id: c.id,
-    name: c.name,
+    full_name: c.full_name,
     email: c.email,
     phone: c.phone,
     source: c.source,
@@ -56,8 +56,8 @@ function toDetail(
 }
 
 export const contactsHandlers = [
-  // GET /api/contacts
-  http.get(`${BASE}/api/contacts`, ({ request }) => {
+  // GET /api/crm/contacts — per NLH-NEDU-CRM-MVP1-001 §6
+  http.get(`${BASE}/api/crm/contacts`, ({ request }) => {
     const uid = resolveMockUidFromRequest(request)
     const url = new URL(request.url)
     const q = url.searchParams.get('q')?.toLowerCase() ?? ''
@@ -97,8 +97,8 @@ export const contactsHandlers = [
     })
   }),
 
-  // GET /api/contacts/:id
-  http.get(`${BASE}/api/contacts/:id`, ({ request, params }) => {
+  // GET /api/crm/contacts/:id — per NLH-NEDU-CRM-MVP1-001 §6
+  http.get(`${BASE}/api/crm/contacts/:id`, ({ request, params }) => {
     const uid = resolveMockUidFromRequest(request)
     const contact = MOCK_CONTACTS.find((c) => c.id === params.id)
     if (!contact) return notFound('Contact không tồn tại.')

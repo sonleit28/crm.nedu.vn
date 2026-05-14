@@ -256,7 +256,15 @@ nedu-crm/
 
 ## 4. Database Schema (REFERENCE — KHÔNG own)
 
-CRM portal **KHÔNG own** database. Schema do `nedu-backend` own ở Supabase `ops` schema. Section này chép lại từ BigPicture để dev hiểu shape data, **không phải để CRM portal tạo migration**.
+> ⚠️ **STALE BANNER (2026-05-13)** — Section này chép lại từ BigPicture brief gốc. Sau brainstorm cross-persona, có **4 chỗ lệch schema thực**:
+> 1. `leads.current_stage` enum **6 stages** (`awareness → interest → consideration → intent → enrolled → retention`), không phải 5 stages dưới đây.
+> 2. **KHÔNG có `ops.contacts` table**. Contact = derived view trên `users` + `leads` + `orders` + `enrollments`.
+> 3. NLH **KHÔNG dùng Supabase**. PostgreSQL trực tiếp + app-level guards trong NestJS (không phải RLS).
+> 4. `payments` schema thực phức tạp hơn: tách `orders` + `payments` + `invoices` + `coupons` (xem `nedu-backend/src/db/schema/payment/*`).
+>
+> **Source of truth canonical**: [`new-docs/NLH-NEDU-CRM-MVP1-001.md`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §2 (mental model) + §4 (schema delta). Full rewrite của Section 4 sẽ ship alongside P3-BE merge.
+
+CRM portal **KHÔNG own** database. Schema do `nedu-backend` own ở Postgres (KHÔNG Supabase). Section này chép lại từ BigPicture để dev hiểu shape data, **không phải để CRM portal tạo migration**.
 
 ### `leads`
 
@@ -270,7 +278,7 @@ CREATE TABLE ops.leads (
   interested_course text,                  -- ID hoặc tên khóa
   test_result_json jsonb,                  -- từ nedu.vn/test
   lead_score      int CHECK (lead_score BETWEEN 0 AND 100),
-  current_stage   text NOT NULL,           -- enum: lead_new | contacted | consulting | followup | closed
+  current_stage   text NOT NULL,           -- ⚠️ STALE: actual = 'awareness'|'interest'|'consideration'|'intent'|'enrolled'|'retention'
   callback_at     timestamptz,             -- lịch hẹn gọi lại (nullable)
   assigned_to     uuid REFERENCES ops.users(id),
   created_at      timestamptz NOT NULL DEFAULT now()  -- IMMUTABLE
@@ -295,6 +303,8 @@ CREATE TABLE ops.pipeline_actions (
 ```
 
 ### `contacts`
+
+> ⚠️ **STALE — bảng này KHÔNG TỒN TẠI trong schema thực.** Contact là *derived view* trên `users` + `leads` + `orders` + `enrollments`, không phải table riêng. Xem [`NLH-NEDU-CRM-MVP1-001`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §2.1. SQL dưới đây giữ làm reference shape cho FE display, không phải migration target.
 
 ```sql
 CREATE TABLE ops.contacts (
@@ -339,6 +349,8 @@ CREATE TABLE ops.payments (
 
 ### RLS — tóm tắt (enforce ở `nedu-backend`)
 
+> ⚠️ **STALE — NLH không dùng Postgres RLS.** Phân quyền enforce ở **app-level guards trong NestJS** (per memory `feedback_nlh_no_supabase.md`). Bảng dưới giữ làm reference logic phân quyền, không phải RLS config trên DB.
+
 | Table             | Founder/Admin                            | Sale (consultant)                            |
 | ----------------- | ---------------------------------------- | -------------------------------------------- |
 | leads             | SELECT all                               | SELECT WHERE assigned_to = auth.uid()        |
@@ -352,6 +364,8 @@ CREATE TABLE ops.payments (
 ---
 
 ## 5. TypeScript Types
+
+> ⚠️ **STALE BANNER (2026-05-13)** — `LeadStage` enum dưới đây phản ánh 5 stages của brief gốc. **Actual schema = 6 stages** (`awareness | interest | consideration | intent | enrolled | retention`). MSW handlers + types phải update khi P3-BE wire (Sprint 6). Xem [`NLH-NEDU-CRM-MVP1-001`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §2 + §6.
 
 ### `shared/types/auth.ts`
 
@@ -377,12 +391,14 @@ export interface TokenPair {
 
 ```ts
 // ─── Enums (string literal unions) ─────────────────────────────
+// ⚠️ STALE — actual schema 6 stages. Update khi P3-BE wire (Sprint 6).
+// Target: 'awareness' | 'interest' | 'consideration' | 'intent' | 'enrolled' | 'retention'
 export type LeadStage =
-  | 'lead_new'      // Lead mới
-  | 'contacted'     // Tiếp cận
-  | 'consulting'    // Tư vấn
-  | 'followup'      // Follow-up
-  | 'closed'        // Chốt đơn
+  | 'lead_new'      // Lead mới        ⚠️ stale, map → 'awareness'
+  | 'contacted'     // Tiếp cận        ⚠️ stale, map → 'interest'
+  | 'consulting'    // Tư vấn          ⚠️ stale, map → 'consideration'
+  | 'followup'      // Follow-up       ⚠️ stale, map → 'intent'
+  | 'closed'        // Chốt đơn        ⚠️ stale, map → 'enrolled' (no 'retention' equivalent in brief)
 
 export type LeadSource =
   | 'facebook_ads' | 'google' | 'referral' | 'webinar' | 'organic' | 'tiktok'

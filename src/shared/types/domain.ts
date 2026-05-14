@@ -67,7 +67,7 @@ export interface PipelineAction {
 
 export interface ContactSummary {
   id: string
-  name: string
+  full_name: string
   email?: string
   phone?: string
   source: LeadSource

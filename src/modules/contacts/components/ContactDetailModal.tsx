@@ -28,7 +28,7 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
   return (
     <Modal open={!!contactId} onClose={onClose} width={620} ariaLabel="Chi tiết contact">
       <ModalHeader
-        title={contact?.name ?? '...'}
+        title={contact?.full_name ?? '...'}
         subtitle={
           contact
             ? `${contact.email ?? '—'} · ${contact.phone ?? '—'} / Nguồn: ${SOURCE_LABEL[contact.source]}`
