@@ -2,7 +2,7 @@ import { useContact } from '../hooks/useContact'
 import { Modal, ModalHeader, ModalBody } from '@shared/components/ui/Modal'
 import { Spinner } from '@shared/components/ui/Spinner'
 import { TierBadge } from './TierBadge'
-import { SOURCE_LABEL } from '@shared/utils/enums'
+import { sourceLabel } from '@shared/utils/enums'
 import { formatDateVN } from '@shared/utils/formatDateVN'
 import { formatVND } from '@shared/utils/formatVND'
 import { useAuthStore } from '@modules/auth/stores/useAuthStore'
@@ -14,24 +14,25 @@ interface ContactDetailModalProps {
 
 export function ContactDetailModal({ contactId, onClose }: ContactDetailModalProps) {
   const { data: contact, isLoading } = useContact(contactId)
-  const role = useAuthStore((s) => s.user?.role)
-  const isAdmin = role === 'founder' || role === 'admin'
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = !!user?.roles?.some(
+    (r) => r === 'founder' || r === 'admin' || r === 'owner',
+  )
 
   const paymentBadgeCls = {
     paid: 'bg-mint/10 text-mint border border-mint/30',
     completed: 'bg-mint/10 text-mint border border-mint/30',
     pending: 'bg-amber/10 text-amber border border-amber/30',
-    overdue: 'bg-red/10 text-red border border-red/30',
     refunded: 'bg-muted/10 text-text2 border border-border',
   }
 
   return (
     <Modal open={!!contactId} onClose={onClose} width={620} ariaLabel="Chi tiết contact">
       <ModalHeader
-        title={contact?.name ?? '...'}
+        title={contact?.full_name ?? '...'}
         subtitle={
           contact
-            ? `${contact.email ?? '—'} · ${contact.phone ?? '—'} / Nguồn: ${SOURCE_LABEL[contact.source]}`
+            ? `${contact.email ?? '—'} · ${contact.phone ?? '—'} / Nguồn: ${sourceLabel(contact.source)}`
             : undefined
         }
         onClose={onClose}
@@ -52,7 +53,7 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
                 <KvRow label="Ngày tạo lead" value={formatDateVN(contact.lead_date, { withYear: true })} />
                 <KvRow
                   label="TV viên phụ trách"
-                  value={<span className="text-accent font-medium">{contact.sale_owner_name}</span>}
+                  value={<span className="text-accent font-medium">{contact.assigned_to_name ?? '—'}</span>}
                 />
               </div>
             </section>
@@ -166,10 +167,12 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
   )
 }
 
+// Per locked OD-2 rule (Sơn 2026-05-13): tier qualifies via course count OR LTV.
+// Diamond ≥3 khóa OR ≥10M; gold ≥2 OR ≥5M; silver ≥1 OR ≥1M; newbie chưa enroll.
 const TIER_DESC: Record<string, string> = {
-  diamond: 'VIP · 3+ khóa',
-  gold: 'Khách thân thiết · 2 khóa',
-  silver: 'Mới / 1 khóa',
+  diamond: 'VIP · ≥3 khóa hoặc ≥10M',
+  gold: 'Thân thiết · ≥2 khóa hoặc ≥5M',
+  silver: 'Mới · ≥1 khóa hoặc ≥1M',
   newbie: 'Chưa enroll',
 }
 

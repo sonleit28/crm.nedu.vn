@@ -15,7 +15,8 @@ export function RoleGate({ allow, fallback = '/dashboard' }: RoleGateProps) {
   const location = useLocation()
   const pushToast = useToastStore((s) => s.push)
 
-  const denied = !user || !allow.includes(user.role)
+  const denied =
+    !user || !user.roles.some((r) => (allow as readonly string[]).includes(r))
 
   useEffect(() => {
     if (denied && user) {

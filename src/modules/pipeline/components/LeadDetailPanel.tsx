@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import type { LeadStage } from '@shared/types/domain'
-import { SOURCE_LABEL, STAGE_LABEL, ACTION_TYPE_META } from '@shared/utils/enums'
+import {
+  SOURCE_LABEL,
+  STAGE_LABEL,
+  ACTION_TYPE_META,
+  ACTION_TYPE_DEFAULT_META,
+  isStageChangeAction,
+} from '@shared/utils/enums'
 import { formatDateTimeVN, timeAgoVN } from '@shared/utils/formatDateVN'
 import { Button } from '@shared/components/ui/Button'
 import { Spinner } from '@shared/components/ui/Spinner'
@@ -183,11 +189,10 @@ export function LeadDetailPanel({ leadId, onClose }: LeadDetailPanelProps) {
                 ) : (
                   <ol className="space-y-2.5">
                     {actions.map((a) => {
-                      const meta = ACTION_TYPE_META[a.action_type]
-                      const stageInfo =
-                        a.action_type === 'move' || a.action_type === 'enroll'
-                          ? `${a.from_stage ? STAGE_LABEL[a.from_stage] : '—'} → ${a.to_stage ? STAGE_LABEL[a.to_stage] : '—'}`
-                          : null
+                      const meta = ACTION_TYPE_META[a.action_type] ?? ACTION_TYPE_DEFAULT_META
+                      const stageInfo = isStageChangeAction(a.action_type)
+                        ? `${a.from_stage ? STAGE_LABEL[a.from_stage] : '—'} → ${a.to_stage ? STAGE_LABEL[a.to_stage] : '—'}`
+                        : null
                       return (
                         <li
                           key={a.id}

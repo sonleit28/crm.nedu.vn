@@ -20,7 +20,11 @@
 
 ## 1. Mục đích
 
-CRM portal cho N-Education — quản lý lifecycle học viên từ lead → enrolled → thanh toán → analytics. 6 modules: Dashboard / Pipeline Kanban (5 stage) / Contacts / Finance / Overdue / Analytics. Người dùng chính là **Founder + Admin** (full access) và **Sale viên** (giới hạn theo phân quyền).
+CRM portal cho N-Education — quản lý lifecycle học viên từ lead → enrolled → thanh toán → analytics.
+
+**5 modules** (sau khi Nedu drop installment scheme 2026-05-13): Dashboard / Pipeline Kanban / Contacts / Finance / Analytics. Người dùng chính là **Founder + Admin** (full access) và **Sale viên** (giới hạn theo phân quyền).
+
+> ⚠️ **Note**: Module **Overdue** (quá hạn trả góp) đã bị descope — Nedu không còn cho học viên trả góp trực tiếp qua Nedu nữa. Toàn bộ logic SSE overdue, installment tracking, AR cards đã xoá. Xem [`new-docs/NLH-NEDU-CRM-MVP1-001.md`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) changelog v0.4.
 
 Portal là **frontend-only**: mọi data đi qua `api.nedu.vn` (Express/NestJS, IT đang build song song). Không tự host DB, không có backend riêng. Nguồn dữ liệu cuối là Supabase `ops` schema do `nedu-backend` own — CRM portal chỉ READ + gửi mutation (chủ yếu là INSERT vào `pipeline_actions`).
 
@@ -256,7 +260,15 @@ nedu-crm/
 
 ## 4. Database Schema (REFERENCE — KHÔNG own)
 
-CRM portal **KHÔNG own** database. Schema do `nedu-backend` own ở Supabase `ops` schema. Section này chép lại từ BigPicture để dev hiểu shape data, **không phải để CRM portal tạo migration**.
+> ⚠️ **STALE BANNER (2026-05-13)** — Section này chép lại từ BigPicture brief gốc. Sau brainstorm cross-persona, có **4 chỗ lệch schema thực**:
+> 1. `leads.current_stage` enum **6 stages** (`awareness → interest → consideration → intent → enrolled → retention`), không phải 5 stages dưới đây.
+> 2. **KHÔNG có `ops.contacts` table**. Contact = derived view trên `users` + `leads` + `orders` + `enrollments`.
+> 3. NLH **KHÔNG dùng Supabase**. PostgreSQL trực tiếp + app-level guards trong NestJS (không phải RLS).
+> 4. `payments` schema thực phức tạp hơn: tách `orders` + `payments` + `invoices` + `coupons` (xem `nedu-backend/src/db/schema/payment/*`).
+>
+> **Source of truth canonical**: [`new-docs/NLH-NEDU-CRM-MVP1-001.md`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §2 (mental model) + §4 (schema delta). Full rewrite của Section 4 sẽ ship alongside P3-BE merge.
+
+CRM portal **KHÔNG own** database. Schema do `nedu-backend` own ở Postgres (KHÔNG Supabase). Section này chép lại từ BigPicture để dev hiểu shape data, **không phải để CRM portal tạo migration**.
 
 ### `leads`
 
@@ -270,7 +282,7 @@ CREATE TABLE ops.leads (
   interested_course text,                  -- ID hoặc tên khóa
   test_result_json jsonb,                  -- từ nedu.vn/test
   lead_score      int CHECK (lead_score BETWEEN 0 AND 100),
-  current_stage   text NOT NULL,           -- enum: lead_new | contacted | consulting | followup | closed
+  current_stage   text NOT NULL,           -- ⚠️ STALE: actual = 'awareness'|'interest'|'consideration'|'intent'|'enrolled'|'retention'
   callback_at     timestamptz,             -- lịch hẹn gọi lại (nullable)
   assigned_to     uuid REFERENCES ops.users(id),
   created_at      timestamptz NOT NULL DEFAULT now()  -- IMMUTABLE
@@ -295,6 +307,8 @@ CREATE TABLE ops.pipeline_actions (
 ```
 
 ### `contacts`
+
+> ⚠️ **STALE — bảng này KHÔNG TỒN TẠI trong schema thực.** Contact là *derived view* trên `users` + `leads` + `orders` + `enrollments`, không phải table riêng. Xem [`NLH-NEDU-CRM-MVP1-001`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §2.1. SQL dưới đây giữ làm reference shape cho FE display, không phải migration target.
 
 ```sql
 CREATE TABLE ops.contacts (
@@ -339,6 +353,8 @@ CREATE TABLE ops.payments (
 
 ### RLS — tóm tắt (enforce ở `nedu-backend`)
 
+> ⚠️ **STALE — NLH không dùng Postgres RLS.** Phân quyền enforce ở **app-level guards trong NestJS** (per memory `feedback_nlh_no_supabase.md`). Bảng dưới giữ làm reference logic phân quyền, không phải RLS config trên DB.
+
 | Table             | Founder/Admin                            | Sale (consultant)                            |
 | ----------------- | ---------------------------------------- | -------------------------------------------- |
 | leads             | SELECT all                               | SELECT WHERE assigned_to = auth.uid()        |
@@ -352,6 +368,8 @@ CREATE TABLE ops.payments (
 ---
 
 ## 5. TypeScript Types
+
+> ℹ️ **Updated 2026-05-13** — Snippets dưới reflect current FE state (post-descope + Path D 6-stage). Source of truth: `src/shared/types/domain.ts`. Đối với BE response shape canonical, xem [`new-docs/NLH-NEDU-CRM-MVP1-001.md`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §6.2 `ContactRow`.
 
 ### `shared/types/auth.ts`
 
@@ -375,14 +393,18 @@ export interface TokenPair {
 
 ### `shared/types/domain.ts`
 
+> ℹ️ Snippet dưới đây updated 2026-05-13 sau descope. Source of truth canonical:
+> `src/shared/types/domain.ts`. Khi mismatch → file `.ts` thắng.
+
 ```ts
-// ─── Enums (string literal unions) ─────────────────────────────
+// ─── Enums (string literal unions) — current state (Path D 6-stage, no installment) ───
 export type LeadStage =
-  | 'lead_new'      // Lead mới
-  | 'contacted'     // Tiếp cận
-  | 'consulting'    // Tư vấn
-  | 'followup'      // Follow-up
-  | 'closed'        // Chốt đơn
+  | 'awareness'
+  | 'interest'
+  | 'consideration'
+  | 'intent'
+  | 'enrolled'
+  | 'retention'
 
 export type LeadSource =
   | 'facebook_ads' | 'google' | 'referral' | 'webinar' | 'organic' | 'tiktok'
@@ -391,7 +413,8 @@ export type LeadScoreBucket = 'hot' | 'warm' | 'cold'
 
 export type ContactTier = 'diamond' | 'gold' | 'silver' | 'newbie'
 
-export type PaymentStatus = 'completed' | 'pending' | 'overdue' | 'refunded'
+// 'overdue' đã drop sau khi Nedu bỏ installment scheme (changelog v0.4 MVP-1 doc).
+export type PaymentStatus = 'completed' | 'pending' | 'refunded'
 
 export type PaymentGateway = 'vnpay' | 'stripe' | 'momo' | 'manual'
 
@@ -1006,69 +1029,13 @@ Table cols: Học viên | Khóa | Số tiền | Phương thức | Trạng thái 
 
 ---
 
-### 7.7. OverduePage (CRM-015..017)
+### 7.7. ~~OverduePage (CRM-015..017)~~ — DESCOPED 2026-05-13
 
-Route: `/overdue`. Roles: Founder/Admin (full list); Consultant (chỉ case của mình).
-
-**Heading:** "🔴 Thanh toán quá hạn" + sub "[N] học viên có khoản thanh toán quá hạn — cần xử lý ngay".
-
-**Alert banner critical** (top, sticky 60px below topbar): hiển thị nếu có case `overdue_days >= 7`. "🔴 KHẨN CẤP cho Sale — [name] quá hạn [X] ngày · đã escalate Admin". Chỉ banner cho case khẩn nhất (top 1).
-
-**Sort:** desc theo `overdue_days` (nặng nhất trên cùng).
-
-**OverdueCard:** stack vertical, gap 12px. Border-left:
-- Severity `critical` (≥5 ngày) → `border-left: 3px solid var(--red)`
-- Severity `warn` (<5 ngày) → `border-left: 3px solid var(--amber)`
-
-Card sections:
-
-1. **Header row** (flex justify-between):
-   - Left:
-     - Name (15px bold)
-     - "[course_name] · [installment_type]" (12px text2)
-     - "Sale phụ trách: [name] · SĐT: [phone]" (11px, name color accent)
-   - Right (text-right):
-     - "Đang quá hạn" (11px text2)
-     - `{overdue_amount}` (20px bold, color red/amber theo severity)
-     - "Quá hạn [X] ngày" (11px font-600 same color)
-
-2. **Progress 3-column box** (grid 3 col, padding 12px 14px, bg `var(--card2)`):
-   - Tổng học phí: `{total_fee}` + sub "[N] kỳ × [X]M"
-   - Đã thanh toán: `{paid_amount}` (mint) + sub "✓ Kỳ [last_paid_index] ([date])"
-   - Còn nợ: `{remaining_amount}` (red/amber) + sub "Kỳ [overdue_idx] (quá hạn) + Kỳ [next]..."
-
-3. **Installment progress bar** (8px height, radius 4px, overflow hidden):
-   - Chia theo `installment_total` segments, each `width: 100/N %`.
-   - Color theo segment status:
-     - `paid` → mint
-     - `overdue` → red (severity critical) hoặc amber (warn)
-     - `pending` → `var(--card2)` + `border-left: 1px dashed var(--text3)` cho segment chưa đến hạn.
-   - Below bar: row text 10px showing each installment label "✓ Kỳ 1 / 🔴 Kỳ 2 · 20/04 / Kỳ 3 · 20/05" với color tương ứng.
-
-4. **Action buttons row** (gap 8px, mt 14px):
-   - **📞 Liên hệ** (primary) → `<ContactDialer>`:
-     - Modal nhỏ: hiển thị `tel:[contact_phone]` link auto-clickable + textarea note + button "Lưu cuộc gọi" → POST `/payments/:id/contact` body `{ note }`.
-     - Sau success: toast mint "Đã ghi nhận cuộc gọi", invalidate `['overdue']` + `['leads', contact.lead_id, 'actions']`.
-   - **💬 Ghi chú** (secondary) → `<NoteEditor>` inline:
-     - Textarea expand inline trong card + button Lưu/Hủy.
-     - Lưu → POST `/payments/:id/note` body `{ note }`. Sau success: toast "Đã thêm ghi chú · [timestamp]".
-   - **⏸ Tạm dừng học** (danger, **chỉ admin/founder** thấy) → `<PauseStudyDialog>`:
-     - Confirm 2 bước: dialog 1 "Bạn có chắc chắn tạm dừng học?" → click "Xác nhận" → dialog 2 textarea reason required (min 20 char) + button "Tạm dừng".
-     - Submit → POST `/payments/:id/pause` body `{ reason }`. Toast "Đã tạm dừng học của [name]".
-
-**Toast realtime (CRM-017)** — global, không phụ thuộc trang:
-
-`useOverdueSSE` mount ở `App.tsx` (sau ProtectedRoute). Listen event `type=overdue.new`:
-
-- Push toast vào stack góc phải trên (z-index 1000).
-- Toast shape:
-  - Critical (severity=`critical`): border-left `3px solid var(--red)`, icon 🔴.
-  - Warn: border-left amber, icon 🟡.
-  - Body: "[severity_title]" + "[contact_name] · [course_name]" + "[amount] ₫ · Quá hạn [N] ngày · Sale: [name]"
-  - Auto dismiss sau **10 giây**.
-  - Close button ✕ stop propagation.
-  - Click toast (không phải ✕) → navigate `/overdue` + dismiss.
-- Đồng thời: bump `useOverdueBadgeStore.count` để sidebar badge update realtime.
+> **Feature fully removed.** Nedu đã bỏ cơ chế học viên trả góp trực tiếp qua Nedu (chia học phí thành N kỳ, không lãi). Không còn installment → không còn payment overdue. Toàn bộ stack đã xoá: `src/modules/overdue/`, `useOverdueSSE`, `useOverdueBadgeStore`, `sse-client`, `sseOverdueHandlers`, `OverdueAlertBanner`, `OverdueCase` type, `Payment.installment_*` fields, `PaymentStatus 'overdue'`, `FinanceSummary.{collected,receivable,overdue}_*` fields.
+>
+> Chi tiết historical spec lưu ở git history commit trước `1f28aaf`. Future spec change về Overdue (nếu Nedu reintroduce installment) → tạo doc mới, không revive section này.
+>
+> **Lead callback overdue** (consultant chưa gọi lead theo lịch) **khác concept** — vẫn live trong Pipeline module (CallbackBadge + formatDateVN classifyCallback).
 
 ---
 

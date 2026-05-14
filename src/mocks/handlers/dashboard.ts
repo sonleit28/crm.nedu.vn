@@ -27,8 +27,6 @@ const SUMMARY: DashboardSummary = {
     { course_id: 'c_public_speaking_b2', course_name: 'Public Speaking B2', revenue_vnd: 11_000_000, student_count: 2 },
     { course_id: 'c_other', course_name: 'Khác', revenue_vnd: 3_500_000, student_count: 1 },
   ],
-  has_critical_overdue: true,
-  top_overdue: { name: 'Lưu Văn Bảo', days: 7, status: 'escalated' },
 }
 
 const CLOSE_RATE: CloseRateByCourse[] = [

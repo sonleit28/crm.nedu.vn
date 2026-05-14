@@ -6,6 +6,6 @@ export function useFinanceSummary(month?: string) {
   const m = month ?? new Date().toISOString().slice(0, 7)
   return useQuery<FinanceSummary>({
     queryKey: ['finance', 'summary', m],
-    queryFn: () => api.get<FinanceSummary>(`/finance/summary?month=${m}`),
+    queryFn: () => api.get<FinanceSummary>(`/crm/finance/summary?month=${m}`),
   })
 }

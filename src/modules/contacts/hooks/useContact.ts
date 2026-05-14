@@ -5,7 +5,7 @@ import type { ContactDetail } from '@shared/types/domain'
 export function useContact(id: string | null) {
   return useQuery<ContactDetail>({
     queryKey: ['contacts', id],
-    queryFn: () => api.get<ContactDetail>(`/contacts/${id}`),
+    queryFn: () => api.get<ContactDetail>(`/crm/contacts/${id}`),
     enabled: !!id,
   })
 }

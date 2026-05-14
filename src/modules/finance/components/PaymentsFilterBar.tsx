@@ -1,19 +1,7 @@
 import { Select } from '@shared/components/ui/Select'
 import { Button } from '@shared/components/ui/Button'
 import type { PaymentFilters } from '../hooks/usePayments'
-
-const COURSE_OPTIONS = [
-  { value: 'Design Thinking B5', label: 'Design Thinking B5' },
-  { value: 'Là Chính Mình B3', label: 'Là Chính Mình B3' },
-  { value: 'Public Speaking B2', label: 'Public Speaking B2' },
-  { value: 'Storytelling B4', label: 'Storytelling B4' },
-]
-
-const STATUS_OPTIONS = [
-  { value: 'completed', label: '✓ Hoàn thành' },
-  { value: 'pending', label: '⏳ Đang chờ' },
-  { value: 'refunded', label: '↩ Hoàn tiền' },
-]
+import { useFinanceFilterOptions } from '../hooks/useFinanceCourses'
 
 interface PaymentsFilterBarProps {
   filters: PaymentFilters
@@ -23,6 +11,9 @@ interface PaymentsFilterBarProps {
 
 export function PaymentsFilterBar({ filters, onChange, onReset }: PaymentsFilterBarProps) {
   const hasFilter = !!(filters.from || filters.to || filters.course || filters.status)
+  const { data: opts, isLoading } = useFinanceFilterOptions()
+  const courseOptions = opts?.courses ?? []
+  const statusOptions = opts?.statuses ?? []
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -48,15 +39,15 @@ export function PaymentsFilterBar({ filters, onChange, onReset }: PaymentsFilter
       <Select
         value={filters.course ?? ''}
         onChange={(e) => onChange({ course: e.target.value, page: 1 })}
-        options={COURSE_OPTIONS}
-        placeholder="Tất cả khóa"
+        options={courseOptions}
+        placeholder={isLoading ? 'Đang tải khóa...' : 'Tất cả khóa'}
       />
 
       <Select
         value={filters.status ?? ''}
         onChange={(e) => onChange({ status: e.target.value, page: 1 })}
-        options={STATUS_OPTIONS}
-        placeholder="Tất cả trạng thái"
+        options={statusOptions}
+        placeholder={isLoading ? 'Đang tải trạng thái...' : 'Tất cả trạng thái'}
       />
 
       {hasFilter && (
