@@ -3,7 +3,13 @@ import { tokenStorage } from './token-storage'
 import type { TokenPair } from '@shared/types/auth'
 
 export function redirectToGoogleLogin(returnTo: string = '/auth-callback'): void {
-  const url = `${env.AUTH_CENTRAL_URL}/auth/oauth/google?return_to=${encodeURIComponent(returnTo)}`
+  // auth-central isAllowedReturnUrl parse `new URL(returnTo)` → throw nếu
+  // relative path → "return_to origin is not allowed". Phải gửi absolute URL.
+  // Per auth-central src/routes/auth.ts:37-48.
+  const absoluteReturnTo = returnTo.startsWith('http')
+    ? returnTo
+    : `${window.location.origin}${returnTo.startsWith('/') ? returnTo : `/${returnTo}`}`
+  const url = `${env.AUTH_CENTRAL_URL}/auth/oauth/google?return_to=${encodeURIComponent(absoluteReturnTo)}`
   window.location.href = url
 }
 
