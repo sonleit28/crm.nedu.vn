@@ -13,7 +13,7 @@ const DEFAULT_FILTERS: ContactFilters = {
   source: '',
   course: '',
   tier: '',
-  limit: 20,
+  size: 50,
   page: 1,
 }
 
@@ -25,7 +25,7 @@ export function ContactsPage() {
   const { data, isLoading, isError, error } = useContacts(filters)
 
   const contacts = data?.data ?? []
-  const total = data?.meta.total ?? 0
+  const total = data?.pagination.total ?? 0
 
   const updateFilters = (patch: Partial<ContactFilters>) => {
     setFilters((prev) => ({ ...prev, ...patch }))
