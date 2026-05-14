@@ -113,7 +113,7 @@ export const MOCK_CONTACTS: MockContactDetail[] = [
     sale_owner_id: 'u_admin',
     current_course_fee: 5_500_000,
     course_history: [],
-    internal_note: 'Phúc đang gặp khó khăn tài chính. Xem xét phương án trả góp.',
+    internal_note: 'Phúc đang gặp khó khăn tài chính. Cần follow-up rõ commitment trước khóa kế tiếp.',
     internal_note_author: 'Admin Demo',
   },
   {
