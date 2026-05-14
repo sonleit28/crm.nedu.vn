@@ -60,7 +60,7 @@ export function ModalHeader({ title, subtitle, onClose }: ModalHeaderProps) {
     <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3 border-b border-border">
       <div>
         <h3 className="text-[16px] font-bold text-text leading-tight">{title}</h3>
-        {subtitle && <div className="text-[12px] text-text2 mt-1">{subtitle}</div>}
+        {subtitle && <div className="text-[12px] text-text2 mt-1 leading-relaxed">{subtitle}</div>}
       </div>
       <button
         type="button"

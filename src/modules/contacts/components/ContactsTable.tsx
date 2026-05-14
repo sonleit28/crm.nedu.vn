@@ -40,7 +40,7 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
               (h) => (
                 <th
                   key={h}
-                  className="px-3 py-2.5 text-left text-[10px] uppercase tracking-wider text-text3 font-semibold"
+                  className="px-3 py-2.5 text-left text-[11px] uppercase tracking-[0.5px] text-text2 font-semibold"
                 >
                   {h}
                 </th>
@@ -52,10 +52,10 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
           {contacts.map((c) => (
             <tr
               key={c.id}
-              className="border-b border-border/50 hover:bg-card2/60 transition-colors"
+              className="border-b border-border/50 hover:bg-white/[0.02] transition-colors"
             >
               <td className="px-3 py-2.5">
-                <strong className="text-text">{c.name}</strong>
+                <strong className="text-text">{c.full_name}</strong>
               </td>
               <td className="px-3 py-2.5 text-text2 text-[11px]">{c.email ?? '—'}</td>
               <td className="px-3 py-2.5 text-text2">{c.phone ?? '—'}</td>

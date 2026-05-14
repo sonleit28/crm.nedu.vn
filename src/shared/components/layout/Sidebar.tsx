@@ -49,7 +49,7 @@ export function Sidebar() {
       aria-label="Sidebar"
     >
       {/* Logo */}
-      <div className="px-4 pt-4 pb-5 flex items-center gap-2.5">
+      <div className="px-4 pt-4 pb-5 flex items-center gap-2.5 border-b border-border">
         <div className="w-9 h-9 grid place-items-center rounded-r bg-accent text-white font-extrabold text-lg">
           N
         </div>
@@ -69,7 +69,7 @@ export function Sidebar() {
 
         {isAdminOrFounder && (
           <NavSection title="Tài chính">
-            <SidebarNavItem to="/finance" icon="💰" label="Tài chính" />
+            <SidebarNavItem to="/finance" icon="💰" label="Tổng quan" />
           </NavSection>
         )}
 

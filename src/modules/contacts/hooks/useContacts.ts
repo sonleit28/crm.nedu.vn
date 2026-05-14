@@ -23,6 +23,6 @@ export function useContacts(filters: ContactFilters = {}) {
 
   return useQuery<Paginated<ContactSummary>>({
     queryKey: ['contacts', 'list', filters],
-    queryFn: () => api.getRaw<Paginated<ContactSummary>>(`/contacts?${params}`),
+    queryFn: () => api.getRaw<Paginated<ContactSummary>>(`/crm/contacts?${params}`),
   })
 }
