@@ -165,10 +165,12 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
   )
 }
 
+// Per locked OD-2 rule (Sơn 2026-05-13): tier qualifies via course count OR LTV.
+// Diamond ≥3 khóa OR ≥10M; gold ≥2 OR ≥5M; silver ≥1 OR ≥1M; newbie chưa enroll.
 const TIER_DESC: Record<string, string> = {
-  diamond: 'VIP · 3+ khóa',
-  gold: 'Khách thân thiết · 2 khóa',
-  silver: 'Mới / 1 khóa',
+  diamond: 'VIP · ≥3 khóa hoặc ≥10M',
+  gold: 'Thân thiết · ≥2 khóa hoặc ≥5M',
+  silver: 'Mới · ≥1 khóa hoặc ≥1M',
   newbie: 'Chưa enroll',
 }
 
