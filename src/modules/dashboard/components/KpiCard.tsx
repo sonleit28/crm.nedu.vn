@@ -14,7 +14,7 @@ export function KpiCard({ icon, label, value, footer, onClick }: KpiCardProps) {
     <div
       onClick={onClick}
       className={[
-        'bg-card border border-border rounded-r2 p-4 relative group transition-transform',
+        'bg-card border border-border rounded-r2 p-5 relative group transition-transform',
         clickable ? 'cursor-pointer hover:-translate-y-0.5' : '',
       ].join(' ')}
     >
