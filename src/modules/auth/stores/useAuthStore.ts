@@ -3,8 +3,17 @@ import type { AuthUser, TokenPair } from '@shared/types/auth'
 import { tokenStorage } from '@shared/config/token-storage'
 import { api } from '@shared/config/api-client'
 import { env } from '@shared/config/env'
+import { analytics } from '@shared/analytics'
 
 type Status = 'idle' | 'loading' | 'authenticated' | 'unauthenticated' | 'error'
+
+function syncAnalytics(user: AuthUser | null) {
+  if (user) {
+    analytics.identify(user.id, { role: user.roles[0] })
+  } else {
+    analytics.reset()
+  }
+}
 
 interface AuthState {
   user: AuthUser | null
@@ -41,6 +50,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     ensureMockTokenIfNeeded()
     if (!tokenStorage.getAccess()) {
       set({ status: 'unauthenticated', user: null })
+      syncAnalytics(null)
       return
     }
 
@@ -66,10 +76,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         ),
       ])
       set({ user, status: 'authenticated' })
+      syncAnalytics(user)
     } catch (e) {
       tokenStorage.clear()
       const msg = e instanceof Error ? e.message : 'Auth failed'
       set({ status: 'unauthenticated', user: null, error: msg })
+      syncAnalytics(null)
     }
   },
 
@@ -79,10 +91,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const user = await api.get<AuthUser>('/auth/me')
       set({ user, status: 'authenticated' })
+      syncAnalytics(user)
     } catch (e) {
       tokenStorage.clear()
       const msg = e instanceof Error ? e.message : 'Auth failed'
       set({ status: 'error', user: null, error: msg })
+      syncAnalytics(null)
       throw e
     }
   },
@@ -90,5 +104,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   clear: () => {
     tokenStorage.clear()
     set({ user: null, status: 'unauthenticated', error: null })
+    syncAnalytics(null)
   },
 }))

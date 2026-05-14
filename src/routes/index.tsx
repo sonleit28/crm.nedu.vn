@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@shared/config/query-client'
 import { AppLayout } from '@shared/components/layout/AppLayout'
+import { RouteTracker } from '@shared/analytics/RouteTracker'
 import { ProtectedRoute } from './ProtectedRoute'
 import { RoleGate } from './RoleGate'
 import { LoginPage } from '@modules/auth/pages/LoginPage'
@@ -18,6 +19,7 @@ export function AppRouter() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <RouteTracker />
         <Routes>
           {/* Public */}
           <Route path="/login" element={<LoginPage />} />
