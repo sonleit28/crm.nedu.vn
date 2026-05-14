@@ -88,7 +88,7 @@ export const contactsHandlers = [
     if (q) {
       results = results.filter(
         (c) =>
-          c.name.toLowerCase().includes(q) ||
+          c.full_name.toLowerCase().includes(q) ||
           c.email?.toLowerCase().includes(q) ||
           c.phone?.includes(q),
       )
