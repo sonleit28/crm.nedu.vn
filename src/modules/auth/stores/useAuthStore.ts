@@ -43,8 +43,28 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ status: 'unauthenticated', user: null })
       return
     }
+
+    // Defensive fetch: 1 retry sau 800ms + 8s overall timeout.
+    // Lý do: trên CF (production), MSW Service Worker đôi khi chưa claim
+    // page client kịp ngay sau worker.start() returns → fetch đầu hang.
+    // Retry sau 800ms thường catch trường hợp SW vừa active.
+    // 8s timeout là safety net cho complete hang (mạng + SW + BE).
+    const fetchAuth = async (): Promise<AuthUser> => {
+      try {
+        return await api.get<AuthUser>('/auth/me')
+      } catch {
+        await new Promise((r) => setTimeout(r, 800))
+        return await api.get<AuthUser>('/auth/me')
+      }
+    }
+
     try {
-      const user = await api.get<AuthUser>('/auth/me')
+      const user = await Promise.race([
+        fetchAuth(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Auth /me timeout 8s')), 8000),
+        ),
+      ])
       set({ user, status: 'authenticated' })
     } catch (e) {
       tokenStorage.clear()
