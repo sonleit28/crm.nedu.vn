@@ -5,7 +5,6 @@ import { contactsHandlers } from './handlers/contacts'
 import { paymentsHandlers } from './handlers/payments'
 import { dashboardHandlers } from './handlers/dashboard'
 import { analyticsHandlers } from './handlers/analytics'
-import { sseOverdueHandlers } from './handlers/sse-overdue'
 
 export const worker = setupWorker(
   ...authHandlers,
@@ -14,5 +13,4 @@ export const worker = setupWorker(
   ...paymentsHandlers,
   ...dashboardHandlers,
   ...analyticsHandlers,
-  ...sseOverdueHandlers,
 )

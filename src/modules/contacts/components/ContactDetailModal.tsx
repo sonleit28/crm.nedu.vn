@@ -21,7 +21,6 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
     paid: 'bg-mint/10 text-mint border border-mint/30',
     completed: 'bg-mint/10 text-mint border border-mint/30',
     pending: 'bg-amber/10 text-amber border border-amber/30',
-    overdue: 'bg-red/10 text-red border border-red/30',
     refunded: 'bg-muted/10 text-text2 border border-border',
   }
 

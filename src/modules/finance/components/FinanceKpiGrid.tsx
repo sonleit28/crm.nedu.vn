@@ -5,55 +5,23 @@ interface FinanceKpiGridProps {
   summary: FinanceSummary
 }
 
+// Simplified sau khi drop installment scheme (2026-05-13): chỉ còn Tổng thu tháng.
+// Collected / Công nợ / Quá hạn KPI đã bỏ vì không còn AR concept.
+// Defensive `?? 0` để phòng case stale cache khi chuyển shape.
 export function FinanceKpiGrid({ summary }: FinanceKpiGridProps) {
   return (
     <div className="grid grid-cols-3 gap-4">
-      <KpiCard
-        icon="💰"
-        label="Tổng thu tháng"
-        value={formatVND(summary.total_revenue_vnd)}
-        footer={
-          <DeltaLabel delta={summary.delta_pct_total_revenue} />
-        }
-      />
-      <KpiCard
-        icon="📥"
-        label="Đã thu"
-        value={formatVND(summary.collected_vnd)}
-        valueColor="text-mint"
-        footer={<span className="text-text3">{summary.collected_pct}% tổng</span>}
-      />
-      <KpiCard
-        icon="⏳"
-        label="Công nợ"
-        value={formatVND(summary.receivable_vnd)}
-        valueColor="text-amber"
-        footer={<span className="text-text3">{summary.receivable_count} học viên</span>}
-      />
-    </div>
-  )
-}
-
-function KpiCard({
-  icon,
-  label,
-  value,
-  valueColor = 'text-text',
-  footer,
-}: {
-  icon: string
-  label: string
-  value: string
-  valueColor?: string
-  footer?: React.ReactNode
-}) {
-  return (
-    <div className="bg-card border border-border rounded-r2 p-4">
-      <div className="text-[11px] uppercase tracking-wider text-text3 mb-3">
-        {icon} {label}
+      <div className="bg-card border border-border rounded-r2 p-5">
+        <div className="text-[11px] uppercase tracking-wider text-text3 mb-3">
+          💰 Tổng thu tháng
+        </div>
+        <div className="text-[24px] font-bold text-text leading-none mb-2">
+          {formatVND(summary.total_revenue_vnd ?? 0)}
+        </div>
+        <div className="text-[11px]">
+          <DeltaLabel delta={summary.delta_pct_total_revenue ?? 0} />
+        </div>
       </div>
-      <div className={`text-[24px] font-bold leading-none mb-2 ${valueColor}`}>{value}</div>
-      <div className="text-[11px]">{footer}</div>
     </div>
   )
 }

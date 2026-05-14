@@ -76,13 +76,10 @@ export function PaymentsTable({ payments, isLoading }: PaymentsTableProps) {
                 {p.method ? METHOD_LABEL[p.method] ?? p.method : '—'}
               </td>
               <td className="px-3 py-2.5">
-                <PaymentStatusBadge
-                  status={p.status}
-                  installmentIndex={p.installment_index}
-                />
+                <PaymentStatusBadge status={p.status} />
               </td>
               <td className="px-3 py-2.5 text-text2">
-                {p.paid_at ? formatDateVN(p.paid_at, { withYear: true }) : p.due_date ? `Hạn: ${formatDateVN(p.due_date, { withYear: true })}` : '—'}
+                {p.paid_at ? formatDateVN(p.paid_at, { withYear: true }) : '—'}
               </td>
               <td className="px-3 py-2.5 text-text3">
                 {p.gateway ? GATEWAY_LABEL[p.gateway] ?? p.gateway : '—'}

@@ -7,7 +7,6 @@ export type BadgeVariant =
   | 'active'
   | 'pending'
   | 'paid'
-  | 'overdue'
   | 'refunded'
   | 'info'
   | 'diamond'
@@ -33,7 +32,6 @@ const VARIANT_STYLE: Record<BadgeVariant, string> = {
   active: 'bg-mint/15 text-mint',
   pending: 'bg-amber/15 text-amber',
   paid: 'bg-mint/15 text-mint',
-  overdue: 'bg-red/15 text-red',
   refunded: 'bg-muted/20 text-text2',
   info: 'bg-accent/15 text-accent',
   diamond: 'bg-accent/15 text-accent',

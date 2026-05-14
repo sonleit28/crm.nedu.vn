@@ -20,7 +20,11 @@
 
 ## 1. Mục đích
 
-CRM portal cho N-Education — quản lý lifecycle học viên từ lead → enrolled → thanh toán → analytics. 6 modules: Dashboard / Pipeline Kanban (5 stage) / Contacts / Finance / Overdue / Analytics. Người dùng chính là **Founder + Admin** (full access) và **Sale viên** (giới hạn theo phân quyền).
+CRM portal cho N-Education — quản lý lifecycle học viên từ lead → enrolled → thanh toán → analytics.
+
+**5 modules** (sau khi Nedu drop installment scheme 2026-05-13): Dashboard / Pipeline Kanban / Contacts / Finance / Analytics. Người dùng chính là **Founder + Admin** (full access) và **Sale viên** (giới hạn theo phân quyền).
+
+> ⚠️ **Note**: Module **Overdue** (quá hạn trả góp) đã bị descope — Nedu không còn cho học viên trả góp trực tiếp qua Nedu nữa. Toàn bộ logic SSE overdue, installment tracking, AR cards đã xoá. Xem [`new-docs/NLH-NEDU-CRM-MVP1-001.md`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) changelog v0.4.
 
 Portal là **frontend-only**: mọi data đi qua `api.nedu.vn` (Express/NestJS, IT đang build song song). Không tự host DB, không có backend riêng. Nguồn dữ liệu cuối là Supabase `ops` schema do `nedu-backend` own — CRM portal chỉ READ + gửi mutation (chủ yếu là INSERT vào `pipeline_actions`).
 
@@ -1022,7 +1026,9 @@ Table cols: Học viên | Khóa | Số tiền | Phương thức | Trạng thái 
 
 ---
 
-### 7.7. OverduePage (CRM-015..017)
+### 7.7. ~~OverduePage (CRM-015..017)~~ ⚠️ DESCOPED 2026-05-13
+
+> **Feature removed**: Nedu đã bỏ cơ chế học viên trả góp trực tiếp qua Nedu → toàn bộ logic overdue payment + installment tracking descoped. Source code dưới đây giữ làm reference historical, **không build**. Files đã xoá: `src/modules/overdue/`, `src/shared/hooks/useOverdueSSE.ts`, `src/shared/stores/useOverdueBadgeStore.ts`, `src/shared/config/sse-client.ts`, `src/mocks/handlers/sse-overdue.ts`, `OverdueAlertBanner.tsx`.
 
 Route: `/overdue`. Roles: Founder/Admin (full list); Consultant (chỉ case của mình).
 

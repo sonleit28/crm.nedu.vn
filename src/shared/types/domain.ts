@@ -19,7 +19,9 @@ export type LeadScoreBucket = 'hot' | 'warm' | 'cold'
 
 export type ContactTier = 'diamond' | 'gold' | 'silver' | 'newbie'
 
-export type PaymentStatus = 'completed' | 'pending' | 'overdue' | 'refunded'
+// 'overdue' đã bị drop sau khi Nedu bỏ installment scheme (2026-05-13).
+// Payments giờ full-amount: completed (paid full), pending (đã enroll chưa pay), refunded.
+export type PaymentStatus = 'completed' | 'pending' | 'refunded'
 
 export type PaymentGateway = 'vnpay' | 'stripe' | 'momo' | 'manual'
 
@@ -121,6 +123,8 @@ export interface ContactDetail extends ContactSummary {
   internal_note_author?: string
 }
 
+// Payment: full-amount transaction (no installments).
+// installment_index/installment_total/due_date đã drop với removal của trả góp scheme.
 export interface Payment {
   id: string
   contact_id: string
@@ -128,39 +132,11 @@ export interface Payment {
   course_id: string
   course_name: string
   amount: number
-  installment_index: number
-  installment_total: number
-  due_date?: string
   paid_at?: string
   status: PaymentStatus
   gateway?: PaymentGateway
   method?: 'transfer' | 'card' | 'ewallet'
   created_at: string
-}
-
-export interface OverdueCase {
-  payment_id: string
-  contact_id: string
-  contact_name: string
-  course_name: string
-  installment_type: string
-  installment_index: number
-  installment_total: number
-  sale_owner_name: string
-  sale_owner_phone?: string
-  total_fee: number
-  paid_amount: number
-  remaining_amount: number
-  overdue_amount: number
-  overdue_days: number
-  severity: 'critical' | 'warn'
-  installments: Array<{
-    index: number
-    due_date: string
-    amount: number
-    status: 'paid' | 'overdue' | 'pending'
-    paid_at?: string
-  }>
 }
 
 // ─── Dashboard / Analytics aggregates ──────────────────────────
@@ -182,8 +158,6 @@ export interface DashboardSummary {
     revenue_vnd: number
     student_count: number
   }>
-  has_critical_overdue: boolean
-  top_overdue?: { name: string; days: number; status: 'escalated' | 'pending' }
 }
 
 export interface CloseRateByCourse {
@@ -225,14 +199,9 @@ export interface ConsultantKpi {
   avg_response_hours: number
 }
 
+// Simplified sau khi drop installment scheme — không còn AR/overdue tracking.
 export interface FinanceSummary {
   month: string
   total_revenue_vnd: number
-  collected_vnd: number
-  collected_pct: number
-  receivable_vnd: number
-  receivable_count: number
-  overdue_vnd: number
-  overdue_count: number
   delta_pct_total_revenue: number
 }
