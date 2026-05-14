@@ -1,24 +1,27 @@
 import type { AuthUser } from '@shared/types/auth'
 
+// Mock users — shape khớp BE /api/auth/me response (full_name + roles[]).
 export const MOCK_USERS: ReadonlyArray<AuthUser> = [
   {
     id: 'u_founder',
     email: 'nhi@nedu.vn',
-    name: 'Lê Thảo Nhi',
-    avatar_url: '',
-    role: 'founder',
+    full_name: 'Lê Thảo Nhi',
+    avatar_url: null,
+    roles: ['founder'],
   },
   {
     id: 'u_admin',
     email: 'admin@nedu.vn',
-    name: 'Admin Demo',
-    role: 'admin',
+    full_name: 'Admin Demo',
+    avatar_url: null,
+    roles: ['admin'],
   },
   {
     id: 'u_consultant_minhtam',
     email: 'minhtam@nedu.vn',
-    name: 'Minh Tâm',
-    role: 'consultant',
+    full_name: 'Minh Tâm',
+    avatar_url: null,
+    roles: ['consultant'],
   },
 ] as const
 

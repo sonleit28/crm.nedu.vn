@@ -33,7 +33,7 @@ function applyRoleFilter(list: Lead[], request: Request): Lead[] {
   const user = findMockUserById(uid)
   if (!user) return list
   // Sale (consultant): chỉ thấy lead của mình. Founder/Admin thấy hết.
-  if (user.role === 'consultant') {
+  if (user.roles?.includes('consultant')) {
     return list.filter((l) => l.assigned_to === user.id)
   }
   return list
@@ -108,7 +108,7 @@ export const leadsHandlers = [
     if (!lead) return notFound('Lead không tồn tại.')
 
     // Sale: chỉ move lead của mình
-    if (performer.role === 'consultant' && lead.assigned_to !== performer.id) {
+    if (performer.roles?.includes('consultant') && lead.assigned_to !== performer.id) {
       return notFound('Bạn không có quyền thao tác lead này.')
     }
 
@@ -138,7 +138,7 @@ export const leadsHandlers = [
       action_type: toStage === 'enrolled' ? 'enroll' : 'move',
       note: body.note,
       performed_by: performer.id,
-      performed_by_name: performer.name,
+      performed_by_name: performer.full_name,
       created_at: now,
     }
     actions.unshift(action)
@@ -155,7 +155,7 @@ export const leadsHandlers = [
     const lead = leads.find((l) => l.id === id)
     if (!lead) return notFound('Lead không tồn tại.')
 
-    if (performer.role === 'consultant' && lead.assigned_to !== performer.id) {
+    if (performer.roles?.includes('consultant') && lead.assigned_to !== performer.id) {
       return notFound('Bạn không có quyền thao tác lead này.')
     }
 
@@ -177,7 +177,7 @@ export const leadsHandlers = [
       action_type: body.action_type,
       note: body.note,
       performed_by: performer.id,
-      performed_by_name: performer.name,
+      performed_by_name: performer.full_name,
       metadata: body.metadata,
       created_at: now,
     }
@@ -196,7 +196,7 @@ export const leadsHandlers = [
     const lead = leads.find((l) => l.id === id)
     if (!lead) return notFound('Lead không tồn tại.')
 
-    if (performer.role === 'consultant' && lead.assigned_to !== performer.id) {
+    if (performer.roles?.includes('consultant') && lead.assigned_to !== performer.id) {
       return notFound('Bạn không có quyền thao tác lead này.')
     }
 

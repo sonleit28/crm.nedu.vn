@@ -25,6 +25,6 @@ export function usePayments(filters: PaymentFilters = {}) {
 
   return useQuery<Paginated<Payment>>({
     queryKey: ['payments', 'list', filters],
-    queryFn: () => api.getRaw<Paginated<Payment>>(`/payments?${params}`),
+    queryFn: () => api.getRaw<Paginated<Payment>>(`/crm/payments?${params}`),
   })
 }

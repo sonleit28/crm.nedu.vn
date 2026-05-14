@@ -9,7 +9,9 @@ const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 function isAdmin(uid: string | null) {
   if (!uid) return false
   const user = MOCK_USERS.find((u) => u.id === uid)
-  return user?.role === 'founder' || user?.role === 'admin'
+  return !!user?.roles?.some(
+    (r) => r === 'founder' || r === 'admin' || r === 'owner',
+  )
 }
 
 // Shape khớp NLH-NEDU-CRM-MVP1-001 §6.2 ContactRow (locked 2026-05-13).
@@ -74,7 +76,11 @@ export const contactsHandlers = [
     const source = url.searchParams.get('source') ?? ''
     const course = url.searchParams.get('course') ?? ''
     const tier = url.searchParams.get('tier') ?? ''
-    const limit = parseInt(url.searchParams.get('limit') ?? '20', 10)
+    // Accept both `size` (CRM convention per MVP-1 §6.1) and legacy `limit`.
+    const size = parseInt(
+      url.searchParams.get('size') ?? url.searchParams.get('limit') ?? '50',
+      10,
+    )
     const page = parseInt(url.searchParams.get('page') ?? '1', 10)
 
     let results = [...MOCK_CONTACTS]
@@ -98,12 +104,14 @@ export const contactsHandlers = [
     if (tier) results = results.filter((c) => c.tier === tier)
 
     const total = results.length
-    const offset = (page - 1) * limit
-    const paged = results.slice(offset, offset + limit)
+    const offset = (page - 1) * size
+    const paged = results.slice(offset, offset + size)
 
+    // Envelope per NLH-NEDU-CRM-MVP1-001 §6.2 (locked v0.5).
     return okRaw({
       data: paged.map((c) => toSummary(c, uid)),
-      meta: { page, limit, total },
+      pagination: { page, size, total },
+      meta: { unresolved_count: 0 },
     })
   }),
 

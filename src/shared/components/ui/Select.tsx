@@ -19,11 +19,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       ].join(' ')}
       {...rest}
     >
-      {placeholder && (
-        <option value="" disabled>
-          {placeholder}
-        </option>
-      )}
+      {/* Placeholder option = "Tất cả" / "All" — khả chọn để user có thể
+          reset filter về empty bằng cách chọn lại tùy chọn này. */}
+      {placeholder && <option value="">{placeholder}</option>}
       {options.map((o) => (
         <option key={o.value} value={o.value}>
           {o.label}

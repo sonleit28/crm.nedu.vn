@@ -3,11 +3,25 @@ import { tokenStorage } from './token-storage'
 import type { TokenPair } from '@shared/types/auth'
 
 export function redirectToGoogleLogin(returnTo: string = '/auth-callback'): void {
-  const url = `${env.AUTH_CENTRAL_URL}/auth/oauth/google?return_to=${encodeURIComponent(returnTo)}`
+  // auth-central isAllowedReturnUrl parse `new URL(returnTo)` → throw nếu
+  // relative path → "return_to origin is not allowed". Phải gửi absolute URL.
+  // Per auth-central src/routes/auth.ts:37-48.
+  const absoluteReturnTo = returnTo.startsWith('http')
+    ? returnTo
+    : `${window.location.origin}${returnTo.startsWith('/') ? returnTo : `/${returnTo}`}`
+  const url = `${env.AUTH_CENTRAL_URL}/auth/oauth/google?return_to=${encodeURIComponent(absoluteReturnTo)}`
   window.location.href = url
 }
 
-export async function refreshTokens(): Promise<TokenPair | null> {
+// In-flight refresh promise — dedupe concurrent 401s.
+// Auth-central rotate refresh: request đầu tiên thành công + revoke
+// refresh token cũ. Nếu 3-5 API calls cùng 401 (dashboard / analytics load
+// parallel) và mỗi cái gọi refresh riêng → request thứ 2+ gửi refresh token
+// đã revoked → 401 → tokenStorage.clear → đá ra login dù 1 request đã renew
+// thành công. Singleton promise đảm bảo all callers nhận cùng kết quả.
+let inflightRefresh: Promise<TokenPair | null> | null = null
+
+async function performRefresh(): Promise<TokenPair | null> {
   const refresh = tokenStorage.getRefresh()
   if (!refresh) return null
 
@@ -25,6 +39,14 @@ export async function refreshTokens(): Promise<TokenPair | null> {
   } catch {
     return null
   }
+}
+
+export async function refreshTokens(): Promise<TokenPair | null> {
+  if (inflightRefresh) return inflightRefresh
+  inflightRefresh = performRefresh().finally(() => {
+    inflightRefresh = null
+  })
+  return inflightRefresh
 }
 
 export async function logoutFromCentral(): Promise<void> {

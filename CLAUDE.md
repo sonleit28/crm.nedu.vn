@@ -369,7 +369,7 @@ CREATE TABLE ops.payments (
 
 ## 5. TypeScript Types
 
-> ⚠️ **STALE BANNER (2026-05-13)** — `LeadStage` enum dưới đây phản ánh 5 stages của brief gốc. **Actual schema = 6 stages** (`awareness | interest | consideration | intent | enrolled | retention`). MSW handlers + types phải update khi P3-BE wire (Sprint 6). Xem [`NLH-NEDU-CRM-MVP1-001`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §2 + §6.
+> ℹ️ **Updated 2026-05-13** — Snippets dưới reflect current FE state (post-descope + Path D 6-stage). Source of truth: `src/shared/types/domain.ts`. Đối với BE response shape canonical, xem [`new-docs/NLH-NEDU-CRM-MVP1-001.md`](../../new-docs/NLH-NEDU-CRM-MVP1-001.md) §6.2 `ContactRow`.
 
 ### `shared/types/auth.ts`
 
@@ -393,16 +393,18 @@ export interface TokenPair {
 
 ### `shared/types/domain.ts`
 
+> ℹ️ Snippet dưới đây updated 2026-05-13 sau descope. Source of truth canonical:
+> `src/shared/types/domain.ts`. Khi mismatch → file `.ts` thắng.
+
 ```ts
-// ─── Enums (string literal unions) ─────────────────────────────
-// ⚠️ STALE — actual schema 6 stages. Update khi P3-BE wire (Sprint 6).
-// Target: 'awareness' | 'interest' | 'consideration' | 'intent' | 'enrolled' | 'retention'
+// ─── Enums (string literal unions) — current state (Path D 6-stage, no installment) ───
 export type LeadStage =
-  | 'lead_new'      // Lead mới        ⚠️ stale, map → 'awareness'
-  | 'contacted'     // Tiếp cận        ⚠️ stale, map → 'interest'
-  | 'consulting'    // Tư vấn          ⚠️ stale, map → 'consideration'
-  | 'followup'      // Follow-up       ⚠️ stale, map → 'intent'
-  | 'closed'        // Chốt đơn        ⚠️ stale, map → 'enrolled' (no 'retention' equivalent in brief)
+  | 'awareness'
+  | 'interest'
+  | 'consideration'
+  | 'intent'
+  | 'enrolled'
+  | 'retention'
 
 export type LeadSource =
   | 'facebook_ads' | 'google' | 'referral' | 'webinar' | 'organic' | 'tiktok'
@@ -411,7 +413,8 @@ export type LeadScoreBucket = 'hot' | 'warm' | 'cold'
 
 export type ContactTier = 'diamond' | 'gold' | 'silver' | 'newbie'
 
-export type PaymentStatus = 'completed' | 'pending' | 'overdue' | 'refunded'
+// 'overdue' đã drop sau khi Nedu bỏ installment scheme (changelog v0.4 MVP-1 doc).
+export type PaymentStatus = 'completed' | 'pending' | 'refunded'
 
 export type PaymentGateway = 'vnpay' | 'stripe' | 'momo' | 'manual'
 
@@ -1026,71 +1029,13 @@ Table cols: Học viên | Khóa | Số tiền | Phương thức | Trạng thái 
 
 ---
 
-### 7.7. ~~OverduePage (CRM-015..017)~~ ⚠️ DESCOPED 2026-05-13
+### 7.7. ~~OverduePage (CRM-015..017)~~ — DESCOPED 2026-05-13
 
-> **Feature removed**: Nedu đã bỏ cơ chế học viên trả góp trực tiếp qua Nedu → toàn bộ logic overdue payment + installment tracking descoped. Source code dưới đây giữ làm reference historical, **không build**. Files đã xoá: `src/modules/overdue/`, `src/shared/hooks/useOverdueSSE.ts`, `src/shared/stores/useOverdueBadgeStore.ts`, `src/shared/config/sse-client.ts`, `src/mocks/handlers/sse-overdue.ts`, `OverdueAlertBanner.tsx`.
-
-Route: `/overdue`. Roles: Founder/Admin (full list); Consultant (chỉ case của mình).
-
-**Heading:** "🔴 Thanh toán quá hạn" + sub "[N] học viên có khoản thanh toán quá hạn — cần xử lý ngay".
-
-**Alert banner critical** (top, sticky 60px below topbar): hiển thị nếu có case `overdue_days >= 7`. "🔴 KHẨN CẤP cho Sale — [name] quá hạn [X] ngày · đã escalate Admin". Chỉ banner cho case khẩn nhất (top 1).
-
-**Sort:** desc theo `overdue_days` (nặng nhất trên cùng).
-
-**OverdueCard:** stack vertical, gap 12px. Border-left:
-- Severity `critical` (≥5 ngày) → `border-left: 3px solid var(--red)`
-- Severity `warn` (<5 ngày) → `border-left: 3px solid var(--amber)`
-
-Card sections:
-
-1. **Header row** (flex justify-between):
-   - Left:
-     - Name (15px bold)
-     - "[course_name] · [installment_type]" (12px text2)
-     - "Sale phụ trách: [name] · SĐT: [phone]" (11px, name color accent)
-   - Right (text-right):
-     - "Đang quá hạn" (11px text2)
-     - `{overdue_amount}` (20px bold, color red/amber theo severity)
-     - "Quá hạn [X] ngày" (11px font-600 same color)
-
-2. **Progress 3-column box** (grid 3 col, padding 12px 14px, bg `var(--card2)`):
-   - Tổng học phí: `{total_fee}` + sub "[N] kỳ × [X]M"
-   - Đã thanh toán: `{paid_amount}` (mint) + sub "✓ Kỳ [last_paid_index] ([date])"
-   - Còn nợ: `{remaining_amount}` (red/amber) + sub "Kỳ [overdue_idx] (quá hạn) + Kỳ [next]..."
-
-3. **Installment progress bar** (8px height, radius 4px, overflow hidden):
-   - Chia theo `installment_total` segments, each `width: 100/N %`.
-   - Color theo segment status:
-     - `paid` → mint
-     - `overdue` → red (severity critical) hoặc amber (warn)
-     - `pending` → `var(--card2)` + `border-left: 1px dashed var(--text3)` cho segment chưa đến hạn.
-   - Below bar: row text 10px showing each installment label "✓ Kỳ 1 / 🔴 Kỳ 2 · 20/04 / Kỳ 3 · 20/05" với color tương ứng.
-
-4. **Action buttons row** (gap 8px, mt 14px):
-   - **📞 Liên hệ** (primary) → `<ContactDialer>`:
-     - Modal nhỏ: hiển thị `tel:[contact_phone]` link auto-clickable + textarea note + button "Lưu cuộc gọi" → POST `/payments/:id/contact` body `{ note }`.
-     - Sau success: toast mint "Đã ghi nhận cuộc gọi", invalidate `['overdue']` + `['leads', contact.lead_id, 'actions']`.
-   - **💬 Ghi chú** (secondary) → `<NoteEditor>` inline:
-     - Textarea expand inline trong card + button Lưu/Hủy.
-     - Lưu → POST `/payments/:id/note` body `{ note }`. Sau success: toast "Đã thêm ghi chú · [timestamp]".
-   - **⏸ Tạm dừng học** (danger, **chỉ admin/founder** thấy) → `<PauseStudyDialog>`:
-     - Confirm 2 bước: dialog 1 "Bạn có chắc chắn tạm dừng học?" → click "Xác nhận" → dialog 2 textarea reason required (min 20 char) + button "Tạm dừng".
-     - Submit → POST `/payments/:id/pause` body `{ reason }`. Toast "Đã tạm dừng học của [name]".
-
-**Toast realtime (CRM-017)** — global, không phụ thuộc trang:
-
-`useOverdueSSE` mount ở `App.tsx` (sau ProtectedRoute). Listen event `type=overdue.new`:
-
-- Push toast vào stack góc phải trên (z-index 1000).
-- Toast shape:
-  - Critical (severity=`critical`): border-left `3px solid var(--red)`, icon 🔴.
-  - Warn: border-left amber, icon 🟡.
-  - Body: "[severity_title]" + "[contact_name] · [course_name]" + "[amount] ₫ · Quá hạn [N] ngày · Sale: [name]"
-  - Auto dismiss sau **10 giây**.
-  - Close button ✕ stop propagation.
-  - Click toast (không phải ✕) → navigate `/overdue` + dismiss.
-- Đồng thời: bump `useOverdueBadgeStore.count` để sidebar badge update realtime.
+> **Feature fully removed.** Nedu đã bỏ cơ chế học viên trả góp trực tiếp qua Nedu (chia học phí thành N kỳ, không lãi). Không còn installment → không còn payment overdue. Toàn bộ stack đã xoá: `src/modules/overdue/`, `useOverdueSSE`, `useOverdueBadgeStore`, `sse-client`, `sseOverdueHandlers`, `OverdueAlertBanner`, `OverdueCase` type, `Payment.installment_*` fields, `PaymentStatus 'overdue'`, `FinanceSummary.{collected,receivable,overdue}_*` fields.
+>
+> Chi tiết historical spec lưu ở git history commit trước `1f28aaf`. Future spec change về Overdue (nếu Nedu reintroduce installment) → tạo doc mới, không revive section này.
+>
+> **Lead callback overdue** (consultant chưa gọi lead theo lịch) **khác concept** — vẫn live trong Pipeline module (CallbackBadge + formatDateVN classifyCallback).
 
 ---
 

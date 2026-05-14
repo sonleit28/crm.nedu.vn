@@ -2,7 +2,7 @@ import { useContact } from '../hooks/useContact'
 import { Modal, ModalHeader, ModalBody } from '@shared/components/ui/Modal'
 import { Spinner } from '@shared/components/ui/Spinner'
 import { TierBadge } from './TierBadge'
-import { SOURCE_LABEL } from '@shared/utils/enums'
+import { sourceLabel } from '@shared/utils/enums'
 import { formatDateVN } from '@shared/utils/formatDateVN'
 import { formatVND } from '@shared/utils/formatVND'
 import { useAuthStore } from '@modules/auth/stores/useAuthStore'
@@ -14,8 +14,10 @@ interface ContactDetailModalProps {
 
 export function ContactDetailModal({ contactId, onClose }: ContactDetailModalProps) {
   const { data: contact, isLoading } = useContact(contactId)
-  const role = useAuthStore((s) => s.user?.role)
-  const isAdmin = role === 'founder' || role === 'admin'
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = !!user?.roles?.some(
+    (r) => r === 'founder' || r === 'admin' || r === 'owner',
+  )
 
   const paymentBadgeCls = {
     paid: 'bg-mint/10 text-mint border border-mint/30',
@@ -30,7 +32,7 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
         title={contact?.full_name ?? '...'}
         subtitle={
           contact
-            ? `${contact.email ?? '—'} · ${contact.phone ?? '—'} / Nguồn: ${SOURCE_LABEL[contact.source]}`
+            ? `${contact.email ?? '—'} · ${contact.phone ?? '—'} / Nguồn: ${sourceLabel(contact.source)}`
             : undefined
         }
         onClose={onClose}

@@ -8,6 +8,6 @@ export function useConsultantKpi(from?: string, to?: string) {
   if (to) params.set('to', to)
   return useQuery<ConsultantKpi[]>({
     queryKey: ['analytics', 'consultant-kpi', from, to],
-    queryFn: () => api.get<ConsultantKpi[]>(`/analytics/consultant-kpi?${params}`),
+    queryFn: () => api.get<ConsultantKpi[]>(`/crm/analytics/consultant-kpi?${params}`),
   })
 }

@@ -9,7 +9,9 @@ const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 function isAdmin(uid: string | null) {
   if (!uid) return false
   const user = MOCK_USERS.find((u) => u.id === uid)
-  return user?.role === 'founder' || user?.role === 'admin'
+  return !!user?.roles?.some(
+    (r) => r === 'founder' || r === 'admin' || r === 'owner',
+  )
 }
 
 // FinanceSummary đơn giản hoá sau khi Nedu drop installment scheme

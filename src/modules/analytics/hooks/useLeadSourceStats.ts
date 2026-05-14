@@ -8,6 +8,6 @@ export function useLeadSourceStats(from?: string, to?: string) {
   if (to) params.set('to', to)
   return useQuery<LeadSourceStat[]>({
     queryKey: ['analytics', 'source', from, to],
-    queryFn: () => api.get<LeadSourceStat[]>(`/analytics/source?${params}`),
+    queryFn: () => api.get<LeadSourceStat[]>(`/crm/analytics/source?${params}`),
   })
 }

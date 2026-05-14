@@ -8,6 +8,6 @@ export function useFunnel(from?: string, to?: string) {
   if (to) params.set('to', to)
   return useQuery<FunnelRow[]>({
     queryKey: ['analytics', 'funnel', from, to],
-    queryFn: () => api.get<FunnelRow[]>(`/analytics/funnel?${params}`),
+    queryFn: () => api.get<FunnelRow[]>(`/crm/analytics/funnel?${params}`),
   })
 }

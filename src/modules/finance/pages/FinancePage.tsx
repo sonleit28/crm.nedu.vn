@@ -10,9 +10,26 @@ import { Spinner } from '@shared/components/ui/Spinner'
 import { EmptyState } from '@shared/components/ui/EmptyState'
 import { Button } from '@shared/components/ui/Button'
 
+// Default range = tháng hiện tại [first day, last day].
+function currentMonthRange(): { month: string; from: string; to: string } {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = now.getMonth()
+  const first = new Date(Date.UTC(y, m, 1))
+  const last = new Date(Date.UTC(y, m + 1, 0))
+  const fmt = (d: Date) => d.toISOString().slice(0, 10)
+  return {
+    month: `${y}-${String(m + 1).padStart(2, '0')}`,
+    from: fmt(first),
+    to: fmt(last),
+  }
+}
+
+const RANGE = currentMonthRange()
+
 const DEFAULT_FILTERS: PaymentFilters = {
-  from: '2026-04-01',
-  to: '2026-04-30',
+  from: RANGE.from,
+  to: RANGE.to,
   course: '',
   status: '',
   page: 1,
@@ -21,7 +38,7 @@ const DEFAULT_FILTERS: PaymentFilters = {
 
 export function FinancePage() {
   const [filters, setFilters] = useState<PaymentFilters>(DEFAULT_FILTERS)
-  const { data: summary, isLoading: loadingSummary } = useFinanceSummary('2026-04')
+  const { data: summary, isLoading: loadingSummary } = useFinanceSummary(RANGE.month)
   const { data: paymentsData, isLoading: loadingPayments, isError, error, refetch } = usePayments(filters)
 
   const payments = paymentsData?.data ?? []
