@@ -19,7 +19,7 @@ export function DashboardPage() {
     (r) => r === 'founder' || r === 'admin' || r === 'owner',
   )
 
-  const { data: summary, isLoading } = useDashboardSummary(MONTH)
+  const { data: summary, isLoading, isError, error } = useDashboardSummary(MONTH)
   const { data: closeRate } = useCloseRateByCourse(MONTH)
   const { data: enrollment } = useEnrollmentByCourse(MONTH)
 
@@ -34,7 +34,32 @@ export function DashboardPage() {
     )
   }
 
-  if (!summary) return null
+  // Graceful error/empty state thay vì blank screen khi endpoint chưa
+  // ship hoặc data thiếu. Vẫn render header để em biết đang ở Dashboard.
+  if (isError || !summary) {
+    return (
+      <div className="space-y-5">
+        <header>
+          <h1 className="text-[20px] font-bold text-text">Tổng quan</h1>
+          <p className="text-[12px] text-text2 mt-0.5">
+            Tổng quan hệ thống · Cập nhật theo tháng [{MONTH_LABEL}]
+          </p>
+        </header>
+        <div className="bg-card border border-border rounded-r2 p-8 text-center text-[13px] text-text2">
+          {isError ? (
+            <>
+              <div className="text-text3 mb-1">⚠️ Không tải được Dashboard</div>
+              <div className="text-[12px]">
+                {error instanceof Error ? error.message : 'Endpoint chưa ready (BE Dashboard MVP-2).'}
+              </div>
+            </>
+          ) : (
+            <div className="text-text3">Chưa có dữ liệu cho tháng này.</div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-5">

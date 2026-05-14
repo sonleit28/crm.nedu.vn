@@ -6,6 +6,6 @@ export function useCloseRateByCourse(month?: string) {
   const m = month ?? '2026-04'
   return useQuery<CloseRateByCourse[]>({
     queryKey: ['dashboard', 'close-rate', m],
-    queryFn: () => api.get<CloseRateByCourse[]>(`/dashboard/close-rate?month=${m}`),
+    queryFn: () => api.get<CloseRateByCourse[]>(`/crm/dashboard/close-rate?month=${m}`),
   })
 }

@@ -6,6 +6,6 @@ export function useDashboardSummary(month?: string) {
   const m = month ?? '2026-04'
   return useQuery<DashboardSummary>({
     queryKey: ['dashboard', 'summary', m],
-    queryFn: () => api.get<DashboardSummary>(`/dashboard/summary?month=${m}`),
+    queryFn: () => api.get<DashboardSummary>(`/crm/dashboard/summary?month=${m}`),
   })
 }
