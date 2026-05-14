@@ -52,7 +52,7 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
                 <KvRow label="Ngày tạo lead" value={formatDateVN(contact.lead_date, { withYear: true })} />
                 <KvRow
                   label="TV viên phụ trách"
-                  value={<span className="text-accent font-medium">{contact.sale_owner_name}</span>}
+                  value={<span className="text-accent font-medium">{contact.assigned_to_name ?? '—'}</span>}
                 />
               </div>
             </section>

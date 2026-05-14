@@ -12,17 +12,38 @@ function isAdmin(uid: string | null) {
   return user?.role === 'founder' || user?.role === 'admin'
 }
 
-function toSummary(c: (typeof MOCK_CONTACTS)[number]): ContactSummary {
+// Shape khớp NLH-NEDU-CRM-MVP1-001 §6.2 ContactRow (locked 2026-05-13).
+// LTV gating: per CLAUDE.md RLS — sale không thấy lifetime_value, admin/founder thấy full.
+function toSummary(
+  c: (typeof MOCK_CONTACTS)[number],
+  uid: string | null,
+): ContactSummary {
+  const admin = isAdmin(uid)
   return {
     id: c.id,
+    person_id: c.person_id,
+    identity_resolved: c.identity_resolved,
+    fallback_key: c.fallback_key,
     full_name: c.full_name,
     email: c.email,
     phone: c.phone,
+    current_lead_id: c.current_lead_id,
+    current_stage: c.current_stage,
     source: c.source,
+    assigned_to_user_id: c.assigned_to_user_id,
+    assigned_to_name: c.assigned_to_name,
     current_course: c.current_course,
     payment_status_label: c.payment_status_label,
     payment_status_class: c.payment_status_class,
+    lead_count: c.lead_count,
+    course_count: c.course_count,
+    lifetime_value: admin ? c.lifetime_value : 0,
+    first_purchase_at: c.first_purchase_at,
+    last_purchase_at: c.last_purchase_at,
     tier: c.tier,
+    origin: c.origin,
+    last_interaction_at: c.last_interaction_at,
+    first_seen_at: c.first_seen_at,
   }
 }
 
@@ -34,19 +55,8 @@ function toDetail(
   const isSelf = c.sale_owner_id === uid
 
   return {
-    id: c.id,
-    full_name: c.full_name,
-    email: c.email,
-    phone: c.phone,
-    source: c.source,
-    current_course: c.current_course,
-    payment_status_label: c.payment_status_label,
-    payment_status_class: c.payment_status_class,
-    tier: c.tier,
+    ...toSummary(c, uid),
     lead_date: c.lead_date,
-    sale_owner_name: c.sale_owner_name,
-    // LTV and course history: admin/founder only
-    lifetime_value: admin ? c.lifetime_value : 0,
     current_course_fee: admin ? c.current_course_fee : undefined,
     course_history: admin ? c.course_history : [],
     // Internal note: admin/founder OR sale_owner = self
@@ -92,7 +102,7 @@ export const contactsHandlers = [
     const paged = results.slice(offset, offset + limit)
 
     return okRaw({
-      data: paged.map(toSummary),
+      data: paged.map((c) => toSummary(c, uid)),
       meta: { page, limit, total },
     })
   }),
