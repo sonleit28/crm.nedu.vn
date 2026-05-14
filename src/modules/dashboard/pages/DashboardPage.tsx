@@ -10,8 +10,9 @@ import { Spinner } from '@shared/components/ui/Spinner'
 import { formatVND } from '@shared/utils/formatVND'
 import { useAuthStore } from '@modules/auth/stores/useAuthStore'
 
-const MONTH = '2026-04'
-const MONTH_LABEL = '04/2026'
+const now = new Date()
+const MONTH = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+const MONTH_LABEL = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
 
 export function DashboardPage() {
   const user = useAuthStore((s) => s.user)
