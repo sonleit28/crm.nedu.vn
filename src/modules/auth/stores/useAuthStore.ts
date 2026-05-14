@@ -22,9 +22,13 @@ const MOCK_ACCESS_PREFIX = 'mock_access_'
 
 function ensureMockTokenIfNeeded(): void {
   if (!env.ENABLE_MOCKING) return
-  if (tokenStorage.getAccess()) return
   const mockUid = localStorage.getItem('mock_uid') ?? 'u_admin'
-  tokenStorage.set(`${MOCK_ACCESS_PREFIX}${mockUid}`, `mock_refresh_${mockUid}`)
+  const expected = `${MOCK_ACCESS_PREFIX}${mockUid}`
+  // Re-seed if no token OR token lệch mock_uid hiện tại (dev switched persona).
+  // Prevents RLS bypass khi dev change localStorage.mock_uid without clearing token.
+  if (tokenStorage.getAccess() !== expected) {
+    tokenStorage.set(expected, `mock_refresh_${mockUid}`)
+  }
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
