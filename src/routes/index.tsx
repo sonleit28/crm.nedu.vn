@@ -12,6 +12,7 @@ import { PipelinePage } from '@modules/pipeline/pages/PipelinePage'
 import { ContactsPage } from '@modules/contacts/pages/ContactsPage'
 import { FinancePage } from '@modules/finance/pages/FinancePage'
 import { AnalyticsPage } from '@modules/analytics/pages/AnalyticsPage'
+import { NotificationsPage } from '@modules/notifications/pages/NotificationsPage'
 
 const ADMIN_FOUNDER = ['founder', 'admin'] as const
 
@@ -32,6 +33,7 @@ export function AppRouter() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/pipeline" element={<PipelinePage />} />
               <Route path="/contacts" element={<ContactsPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
 
               {/* Admin/Founder only */}
               <Route element={<RoleGate allow={ADMIN_FOUNDER} />}>
