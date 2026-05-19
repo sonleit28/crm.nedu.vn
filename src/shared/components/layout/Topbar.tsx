@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { NotificationBell } from './NotificationBell'
 
 const PAGE_META: Record<string, { title: string; breadcrumb: string }> = {
   '/dashboard': { title: 'Tổng quan',    breadcrumb: 'Quản lý / Tổng quan' },
@@ -32,6 +33,7 @@ export function Topbar() {
           className="w-[240px] h-9 px-3 rounded-r bg-card2 border border-border text-[12px] text-text2 placeholder:text-text3 disabled:cursor-not-allowed"
           title="Phase 2"
         />
+        <NotificationBell />
         <button
           type="button"
           className="w-9 h-9 grid place-items-center rounded-r bg-card2 border border-border text-text2 hover:text-text"
