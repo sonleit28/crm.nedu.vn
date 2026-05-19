@@ -30,7 +30,8 @@ function formatRelative(iso: string): string {
   return `${days} ngày trước`
 }
 
-export function NotificationsPage(): JSX.Element {
+// Return type để TS infer — React 19 bỏ global JSX namespace.
+export function NotificationsPage() {
   const qc = useQueryClient()
   const navigate = useNavigate()
   const [offset, setOffset] = useState(0)

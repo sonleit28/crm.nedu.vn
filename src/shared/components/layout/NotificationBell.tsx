@@ -30,7 +30,10 @@ function formatRelative(iso: string): string {
 // NotificationBell — chuông badge ở Topbar.
 // Subscribe summary mỗi 15s, hiển thị số unread + dropdown 5 item gần nhất.
 // Click "Đánh dấu đã đọc" → BE mark + đẩy Space chấm đỏ CRM về 0.
-export function NotificationBell(): JSX.Element {
+//
+// Return type để TS infer — React 19 không expose global JSX namespace nữa
+// (TS2503 trên Cloudflare CI). Trước có `JSX.Element` explicit.
+export function NotificationBell() {
   const qc = useQueryClient()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
