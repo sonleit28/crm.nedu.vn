@@ -9,6 +9,31 @@ import { PaymentsTable } from '../components/PaymentsTable'
 import { Spinner } from '@shared/components/ui/Spinner'
 import { EmptyState } from '@shared/components/ui/EmptyState'
 import { Button } from '@shared/components/ui/Button'
+import { api } from '@shared/config/api-client'
+import { exportToCsv } from '@shared/utils/exportCsv'
+import { formatDateVN } from '@shared/utils/formatDateVN'
+import { useToastStore } from '@shared/stores/useToastStore'
+import type { Payment } from '@shared/types/domain'
+import type { Paginated } from '@shared/types/api'
+
+const METHOD_EXPORT_LABEL: Record<string, string> = {
+  transfer: 'Chuyển khoản',
+  card: 'Thẻ',
+  ewallet: 'Ví điện tử',
+}
+
+const GATEWAY_EXPORT_LABEL: Record<string, string> = {
+  vnpay: 'VNPay',
+  stripe: 'Stripe',
+  momo: 'MoMo',
+  manual: 'Thủ công',
+}
+
+const STATUS_EXPORT_LABEL: Record<string, string> = {
+  completed: 'Hoàn thành',
+  pending: 'Chưa thanh toán',
+  refunded: 'Hoàn tiền',
+}
 
 // Default range = tháng hiện tại [first day, last day].
 function currentMonthRange(): { month: string; from: string; to: string } {
@@ -38,10 +63,65 @@ const DEFAULT_FILTERS: PaymentFilters = {
 
 export function FinancePage() {
   const [filters, setFilters] = useState<PaymentFilters>(DEFAULT_FILTERS)
+  const [exporting, setExporting] = useState(false)
+  const pushToast = useToastStore((s) => s.push)
   const { data: summary, isLoading: loadingSummary } = useFinanceSummary(RANGE.month)
   const { data: paymentsData, isLoading: loadingPayments, isError, error, refetch } = usePayments(filters)
 
   const payments = paymentsData?.data ?? []
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      // Lấy TẤT CẢ giao dịch khớp bộ lọc hiện tại (bỏ qua phân trang).
+      const params = new URLSearchParams()
+      if (filters.from) params.set('from', filters.from)
+      if (filters.to) params.set('to', filters.to)
+      if (filters.course) params.set('course', filters.course)
+      if (filters.status) params.set('status', filters.status)
+      if (filters.q) params.set('q', filters.q)
+      params.set('limit', '10000')
+      params.set('page', '1')
+
+      const res = await api.getRaw<Paginated<Payment>>(`/crm/payments?${params}`)
+      const rows = res.data
+
+      if (rows.length === 0) {
+        pushToast({ type: 'warn', title: 'Không có dữ liệu để xuất', body: 'Bộ lọc hiện tại không có giao dịch nào.' })
+        return
+      }
+
+      const headers = [
+        'Học viên', 'Email', 'Số điện thoại', 'Telegram',
+        'Khóa', 'Số tiền (VND)', 'Phương thức', 'Trạng thái',
+        'Ngày thanh toán', 'Cổng thanh toán',
+      ]
+      const csvRows = rows.map((p) => [
+        p.contact_name,
+        p.contact_email ?? '',
+        p.contact_phone ?? '',
+        p.contact_telegram ?? '',
+        p.course_name,
+        p.amount,
+        p.method ? METHOD_EXPORT_LABEL[p.method] ?? p.method : '',
+        STATUS_EXPORT_LABEL[p.status] ?? p.status,
+        p.paid_at ? formatDateVN(p.paid_at, { withYear: true }) : '',
+        p.gateway ? GATEWAY_EXPORT_LABEL[p.gateway] ?? p.gateway : '',
+      ])
+
+      const stamp = new Date().toISOString().slice(0, 10)
+      exportToCsv(`giao-dich-${stamp}.csv`, headers, csvRows)
+      pushToast({ type: 'success', title: 'Đã xuất Excel', body: `${rows.length} giao dịch theo bộ lọc hiện tại.` })
+    } catch (e) {
+      pushToast({
+        type: 'error',
+        title: 'Xuất Excel thất bại',
+        body: e instanceof Error ? e.message : 'Lỗi không xác định.',
+      })
+    } finally {
+      setExporting(false)
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -52,6 +132,14 @@ export function FinancePage() {
             Tổng quan thanh toán — dữ liệu đồng bộ từ payment gateway.
           </p>
         </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={handleExport}
+          disabled={exporting}
+        >
+          {exporting ? 'Đang xuất...' : '⬇ Xuất Excel'}
+        </Button>
       </header>
 
       {/* KPI Grid */}
