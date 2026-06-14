@@ -36,7 +36,7 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
       <table className="w-full text-[12px]">
         <thead>
           <tr className="border-b border-border">
-            {['Tên', 'Email', 'SĐT', 'Nguồn', 'Khóa đang học', 'Phân loại', ''].map(
+            {['Tên', 'Email', 'SĐT', 'Telegram', 'Nguồn', 'Khóa đang học', 'Phân loại', ''].map(
               (h) => (
                 <th
                   key={h}
@@ -59,6 +59,21 @@ export function ContactsTable({ contacts, isLoading, onDetail }: ContactsTablePr
               </td>
               <td className="px-3 py-2.5 text-text2 text-[11px]">{c.email ?? '—'}</td>
               <td className="px-3 py-2.5 text-text2">{c.phone ?? '—'}</td>
+              <td className="px-3 py-2.5 text-text2">
+                {c.telegram ? (
+                  <a
+                    href={`https://t.me/${c.telegram.replace(/^@/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {c.telegram}
+                  </a>
+                ) : (
+                  '—'
+                )}
+              </td>
               <td className="px-3 py-2.5 text-text2">{sourceLabel(c.source)}</td>
               <td className="px-3 py-2.5 text-text">{c.current_course ?? '—'}</td>
               <td className="px-3 py-2.5">

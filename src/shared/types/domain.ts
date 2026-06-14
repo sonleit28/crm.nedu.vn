@@ -82,6 +82,7 @@ export interface ContactSummary {
   full_name: string
   email: string | null
   phone: string | null
+  telegram: string | null
 
   // === Current lead state (latest active episode) ===
   current_lead_id: string | null
@@ -129,6 +130,9 @@ export interface Payment {
   id: string
   contact_id: string
   contact_name: string
+  contact_email?: string | null
+  contact_phone?: string | null
+  contact_telegram?: string | null
   course_id: string
   course_name: string
   amount: number

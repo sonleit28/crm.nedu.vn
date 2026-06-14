@@ -9,7 +9,7 @@ import type {
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
 const SUMMARY: DashboardSummary = {
-  month: '2026-04',
+  month: '2026-06',
   total_leads: 30,
   total_leads_delta_pct: 15,
   close_rate_pct: 16.7,
@@ -44,7 +44,7 @@ const ENROLLMENT: EnrollmentByCourse[] = [
 ]
 
 export const dashboardHandlers = [
-  http.get(`${BASE}/api/dashboard/summary`,   () => ok(SUMMARY)),
-  http.get(`${BASE}/api/dashboard/close-rate`, () => ok(CLOSE_RATE)),
-  http.get(`${BASE}/api/dashboard/enrollment`, () => ok(ENROLLMENT)),
+  http.get(`${BASE}/api/crm/dashboard/summary`,    () => ok(SUMMARY)),
+  http.get(`${BASE}/api/crm/dashboard/close-rate`, () => ok(CLOSE_RATE)),
+  http.get(`${BASE}/api/crm/dashboard/enrollment`, () => ok(ENROLLMENT)),
 ]

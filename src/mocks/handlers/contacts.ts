@@ -29,6 +29,7 @@ function toSummary(
     full_name: c.full_name,
     email: c.email,
     phone: c.phone,
+    telegram: c.telegram,
     current_lead_id: c.current_lead_id,
     current_stage: c.current_stage,
     source: c.source,
@@ -96,7 +97,8 @@ export const contactsHandlers = [
         (c) =>
           c.full_name.toLowerCase().includes(q) ||
           c.email?.toLowerCase().includes(q) ||
-          c.phone?.includes(q),
+          c.phone?.includes(q) ||
+          c.telegram?.toLowerCase().includes(q),
       )
     }
     if (source) results = results.filter((c) => c.source === source)

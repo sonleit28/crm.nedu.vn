@@ -44,6 +44,56 @@ export function ContactDetailModal({ contactId, onClose }: ContactDetailModalPro
           </div>
         ) : (
           <div className="space-y-5">
+            {/* Thông tin liên hệ */}
+            <section>
+              <div className="text-[10px] uppercase tracking-wider text-text3 mb-2">
+                📇 Thông tin liên hệ
+              </div>
+              <div className="bg-card2 rounded-r p-3 space-y-1.5 text-[12px]">
+                <KvRow
+                  label="Email"
+                  value={
+                    contact.email ? (
+                      <a href={`mailto:${contact.email}`} className="text-accent hover:underline">
+                        {contact.email}
+                      </a>
+                    ) : (
+                      '—'
+                    )
+                  }
+                />
+                <KvRow
+                  label="Số điện thoại"
+                  value={
+                    contact.phone ? (
+                      <a href={`tel:${contact.phone}`} className="text-accent hover:underline">
+                        {contact.phone}
+                      </a>
+                    ) : (
+                      '—'
+                    )
+                  }
+                />
+                <KvRow
+                  label="Telegram"
+                  value={
+                    contact.telegram ? (
+                      <a
+                        href={`https://t.me/${contact.telegram.replace(/^@/, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent hover:underline"
+                      >
+                        {contact.telegram}
+                      </a>
+                    ) : (
+                      '—'
+                    )
+                  }
+                />
+              </div>
+            </section>
+
             {/* Thông tin lead */}
             <section>
               <div className="text-[10px] uppercase tracking-wider text-text3 mb-2">

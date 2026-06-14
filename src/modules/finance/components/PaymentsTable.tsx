@@ -47,7 +47,7 @@ export function PaymentsTable({ payments, isLoading }: PaymentsTableProps) {
       <table className="w-full text-[12px]">
         <thead>
           <tr className="border-b border-border">
-            {['Học viên', 'Khóa', 'Số tiền', 'Phương thức', 'Trạng thái', 'Ngày', 'Cổng thanh toán'].map(
+            {['Học viên', 'Email', 'SĐT', 'Telegram', 'Khóa', 'Số tiền', 'Phương thức', 'Trạng thái', 'Ngày', 'Cổng thanh toán'].map(
               (h) => (
                 <th
                   key={h}
@@ -66,6 +66,23 @@ export function PaymentsTable({ payments, isLoading }: PaymentsTableProps) {
               className="border-b border-border/50 transition-colors hover:bg-card2/50"
             >
               <td className="px-3 py-2.5 font-semibold text-text">{p.contact_name}</td>
+              <td className="px-3 py-2.5 text-text2 text-[11px]">{p.contact_email ?? '—'}</td>
+              <td className="px-3 py-2.5 text-text2">{p.contact_phone ?? '—'}</td>
+              <td className="px-3 py-2.5 text-text2">
+                {p.contact_telegram ? (
+                  <a
+                    href={`https://t.me/${p.contact_telegram.replace(/^@/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {p.contact_telegram}
+                  </a>
+                ) : (
+                  '—'
+                )}
+              </td>
               <td className="px-3 py-2.5 text-text2">{p.course_name}</td>
               <td className="px-3 py-2.5">
                 <span className={p.amount < 0 ? 'text-text3' : 'font-semibold text-text'}>
