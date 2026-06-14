@@ -1,5 +1,6 @@
 import type { FunnelRow } from '@shared/types/domain'
 import { Spinner } from '@shared/components/ui/Spinner'
+import { formatPct } from '@shared/utils/formatPct'
 
 interface ConversionFunnelTableProps {
   rows: FunnelRow[]
@@ -60,7 +61,7 @@ export function ConversionFunnelTable({ rows, isLoading }: ConversionFunnelTable
                 {r.count}
               </td>
               <td className={`px-4 py-3 font-semibold ${isFirst ? 'text-text3' : rateColor(r.conversion_pct)}`}>
-                {isFirst ? '—' : `${r.conversion_pct.toFixed(1)}%`}
+                {isFirst ? '—' : formatPct(r.conversion_pct)}
               </td>
             </tr>
           )

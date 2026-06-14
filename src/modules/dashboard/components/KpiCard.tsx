@@ -33,6 +33,9 @@ export function KpiCard({ icon, label, value, footer, onClick }: KpiCardProps) {
 }
 
 export function DeltaBadge({ delta }: { delta: number }) {
+  if (delta == null || Number.isNaN(delta)) {
+    return <span className="text-text3">— vs tháng trước</span>
+  }
   const up = delta >= 0
   return (
     <span className={up ? 'text-mint' : 'text-red'}>
