@@ -8,6 +8,7 @@ import { CloseRateModal } from '../components/CloseRateModal'
 import { EnrollmentModal } from '../components/EnrollmentModal'
 import { Spinner } from '@shared/components/ui/Spinner'
 import { formatVND } from '@shared/utils/formatVND'
+import { formatPct } from '@shared/utils/formatPct'
 import { useAuthStore } from '@modules/auth/stores/useAuthStore'
 
 const now = new Date()
@@ -76,20 +77,20 @@ export function DashboardPage() {
         <KpiCard
           icon="👥"
           label="Tổng Lead (tháng)"
-          value={String(summary.total_leads)}
+          value={String(summary.total_leads ?? 0)}
           footer={<DeltaBadge delta={summary.total_leads_delta_pct} />}
         />
         <KpiCard
           icon="🎯"
           label="Tỷ lệ chốt (tháng)"
-          value={`${summary.close_rate_pct.toFixed(1)}%`}
+          value={formatPct(summary.close_rate_pct)}
           footer={<DeltaBadge delta={summary.close_rate_delta_pct} />}
           onClick={() => setCloseRateOpen(true)}
         />
         <KpiCard
           icon="✅"
           label="Đăng ký thành công"
-          value={String(summary.enrolled_count)}
+          value={String(summary.enrolled_count ?? 0)}
           footer={<DeltaBadge delta={summary.enrolled_delta_pct} />}
           onClick={() => setEnrollOpen(true)}
         />
@@ -104,17 +105,17 @@ export function DashboardPage() {
         <KpiCard
           icon="💬"
           label="Đang được tư vấn"
-          value={String(summary.consulting_total)}
+          value={String(summary.consulting_total ?? 0)}
           footer={
             <span className="text-text3">
-              Tư vấn {summary.consulting_breakdown.consulting} · Theo dõi {summary.consulting_breakdown.followup}
+              Tư vấn {summary.consulting_breakdown?.consulting ?? 0} · Theo dõi {summary.consulting_breakdown?.followup ?? 0}
             </span>
           }
         />
       </div>
 
       {/* Revenue chart — admin/founder only */}
-      {isAdmin && summary.revenue_by_course.length > 0 && (
+      {isAdmin && (summary.revenue_by_course?.length ?? 0) > 0 && (
         <RevenueByCourseChart
           courses={summary.revenue_by_course}
           month={MONTH_LABEL}

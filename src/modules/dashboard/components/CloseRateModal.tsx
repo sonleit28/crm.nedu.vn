@@ -1,5 +1,6 @@
 import { Modal, ModalHeader, ModalBody } from '@shared/components/ui/Modal'
 import type { CloseRateByCourse } from '@shared/types/domain'
+import { formatPct } from '@shared/utils/formatPct'
 
 interface CloseRateModalProps {
   open: boolean
@@ -59,7 +60,7 @@ export function CloseRateModal({ open, onClose, rows, month = '04/2026' }: Close
                 <td className="px-3 py-2.5 text-text2">{r.leads}</td>
                 <td className="px-3 py-2.5 text-text2">{r.closed}</td>
                 <td className={`px-3 py-2.5 font-bold ${rateColor(r.rate_pct)}`}>
-                  {r.rate_pct.toFixed(1)}%
+                  {formatPct(r.rate_pct)}
                 </td>
               </tr>
             ))}

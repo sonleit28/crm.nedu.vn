@@ -50,7 +50,9 @@ export function ConsultantKpiTable({ rows, isLoading }: ConsultantKpiTableProps)
                 {r.rate_pct > 0 ? `${r.rate_pct.toFixed(1)}%` : '—'}
               </td>
               <td className={`px-4 py-3 font-semibold ${responseColor(r.avg_response_hours)}`}>
-                {r.avg_response_hours.toFixed(1)}h
+                {r.avg_response_hours != null && !Number.isNaN(r.avg_response_hours)
+                  ? `${r.avg_response_hours.toFixed(1)}h`
+                  : '—'}
                 {r.avg_response_hours > 5 && <span className="ml-1">🚩</span>}
               </td>
             </tr>
