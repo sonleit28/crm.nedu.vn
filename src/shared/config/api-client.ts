@@ -72,7 +72,19 @@ async function request<T>(method: string, path: string, opts: RequestOptions = {
 
   const json = await res.json()
   // NestJS envelope: { data: T } for single/aggregate. Unwrap.
-  if (json && typeof json === 'object' && 'data' in json && !('meta' in json)) {
+  //
+  // BE Athena-backed endpoints (per Day 24 PR #118 `degradable.ts`) wrap response as
+  // { data: T, meta: { data_status: 'ok' | 'degraded' | 'no_data_yet' } } — the `meta`
+  // field carries graceful-degradation signal, NOT pagination. Previous condition
+  // `!('meta' in json)` skipped unwrap for ANY response with `meta` → useQuery hooks
+  // received whole envelope instead of T → React render crash (e.g.,
+  // `summary.close_rate_pct.toFixed()` on undefined). Live-confirmed Day 47 PM as
+  // GO-LIVE BLOCKER for crm-preview Dashboard/Finance/Analytics.
+  //
+  // Fix: always unwrap `data` for `api.get<T>()`. Paginated lists use the separate
+  // `api.getRaw<Paginated<T>>()` path (request → requestRaw at line 81) which
+  // preserves the full envelope including `meta: { page, limit, total }`.
+  if (json && typeof json === 'object' && 'data' in json) {
     return json.data as T
   }
   return json as T
