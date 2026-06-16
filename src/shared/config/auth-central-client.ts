@@ -26,7 +26,10 @@ async function performRefresh(): Promise<TokenPair | null> {
   if (!refresh) return null
 
   try {
-    const res = await fetch(`${env.API_URL}/api/auth/refresh`, {
+    // Refresh token rotation do auth-central own (bảng refresh_tokens).
+    // nedu-backend (API_URL) CHỈ verify JWT (/auth/me) — KHÔNG có /auth/refresh
+    // → trỏ vào đó = 404 → user bị đá ra login mỗi lần access hết hạn (~15p).
+    const res = await fetch(`${env.AUTH_CENTRAL_URL}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refresh_token: refresh }),
@@ -51,12 +54,16 @@ export async function refreshTokens(): Promise<TokenPair | null> {
 
 export async function logoutFromCentral(): Promise<void> {
   try {
-    await fetch(`${env.API_URL}/api/auth/logout`, {
+    // Logout cũng do auth-central xử (revoke refresh family). Gửi kèm refresh_token
+    // trong body để revoke ENTIRE family (BH-8), không chỉ access_only.
+    const refresh = tokenStorage.getRefresh()
+    await fetch(`${env.AUTH_CENTRAL_URL}/auth/logout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${tokenStorage.getAccess() ?? ''}`,
       },
+      body: JSON.stringify(refresh ? { refresh_token: refresh } : {}),
     })
   } catch {
     // network error → vẫn clear local
