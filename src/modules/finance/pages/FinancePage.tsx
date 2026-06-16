@@ -73,18 +73,29 @@ export function FinancePage() {
   const handleExport = async () => {
     setExporting(true)
     try {
-      // Lấy TẤT CẢ giao dịch khớp bộ lọc hiện tại (bỏ qua phân trang).
-      const params = new URLSearchParams()
-      if (filters.from) params.set('from', filters.from)
-      if (filters.to) params.set('to', filters.to)
-      if (filters.course) params.set('course', filters.course)
-      if (filters.status) params.set('status', filters.status)
-      if (filters.q) params.set('q', filters.q)
-      params.set('limit', '10000')
-      params.set('page', '1')
+      // Lấy TẤT CẢ giao dịch khớp bộ lọc hiện tại. BE giới hạn limit ≤ 200/request
+      // (ListPaymentsQueryDto @Max(200)) nên gom qua nhiều trang thay vì 1 request lớn.
+      const PAGE_SIZE = 200
+      const MAX_PAGES = 200 // chặn vòng lặp vô hạn (tối đa 40k giao dịch)
+      const rows: Payment[] = []
+      let page = 1
+      let total = Infinity
+      while (rows.length < total && page <= MAX_PAGES) {
+        const params = new URLSearchParams()
+        if (filters.from) params.set('from', filters.from)
+        if (filters.to) params.set('to', filters.to)
+        if (filters.course) params.set('course', filters.course)
+        if (filters.status) params.set('status', filters.status)
+        if (filters.q) params.set('q', filters.q)
+        params.set('limit', String(PAGE_SIZE))
+        params.set('page', String(page))
 
-      const res = await api.getRaw<Paginated<Payment>>(`/crm/payments?${params}`)
-      const rows = res.data
+        const res = await api.getRaw<Paginated<Payment>>(`/crm/payments?${params}`)
+        rows.push(...res.data)
+        total = res.meta?.total ?? rows.length
+        if (res.data.length < PAGE_SIZE) break // trang cuối
+        page++
+      }
 
       if (rows.length === 0) {
         pushToast({ type: 'warn', title: 'Không có dữ liệu để xuất', body: 'Bộ lọc hiện tại không có giao dịch nào.' })
