@@ -1,5 +1,6 @@
 import { SidebarNavItem } from './SidebarNavItem'
 import { useAuthStore } from '@modules/auth/stores/useAuthStore'
+import { isFinanceViewerOnly } from '@shared/types/auth'
 import { logoutFromCentral } from '@shared/config/auth-central-client'
 import { useNavigate } from 'react-router-dom'
 
@@ -22,6 +23,7 @@ export function Sidebar() {
   const isAdminOrFounder = userRoles.some(
     (r) => r === 'admin' || r === 'founder' || r === 'owner',
   )
+  const financeOnly = isFinanceViewerOnly(user)
 
   const initials =
     user?.full_name
@@ -44,7 +46,9 @@ export function Sidebar() {
           ? 'Leader'
           : userRoles.includes('consultant')
             ? 'Sale viên'
-            : userRoles[0] // fallback hiển thị role đầu tiên (vd 'iam_manager')
+            : financeOnly
+              ? 'Xem tài chính'
+              : userRoles[0] // fallback hiển thị role đầu tiên (vd 'iam_manager')
               ? userRoles[0].charAt(0).toUpperCase() + userRoles[0].slice(1)
               : ''
 
@@ -72,22 +76,31 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-2 pb-4">
-        <NavSection title="Quản lý">
-          <SidebarNavItem to="/dashboard" icon="📊" label="Tổng quan" />
-          <SidebarNavItem to="/pipeline" icon="🔀" label="Tư vấn" />
-          <SidebarNavItem to="/contacts" icon="👥" label="Khách hàng" />
-        </NavSection>
-
-        {isAdminOrFounder && (
+        {financeOnly ? (
+          // Finance-only viewer: chỉ thấy đúng mục Tài chính.
           <NavSection title="Tài chính">
             <SidebarNavItem to="/finance" icon="💰" label="Tổng quan" />
           </NavSection>
-        )}
+        ) : (
+          <>
+            <NavSection title="Quản lý">
+              <SidebarNavItem to="/dashboard" icon="📊" label="Tổng quan" />
+              <SidebarNavItem to="/pipeline" icon="🔀" label="Tư vấn" />
+              <SidebarNavItem to="/contacts" icon="👥" label="Khách hàng" />
+            </NavSection>
 
-        {isAdminOrFounder && (
-          <NavSection title="Phân tích">
-            <SidebarNavItem to="/analytics" icon="📈" label="Phân tích" />
-          </NavSection>
+            {isAdminOrFounder && (
+              <NavSection title="Tài chính">
+                <SidebarNavItem to="/finance" icon="💰" label="Tổng quan" />
+              </NavSection>
+            )}
+
+            {isAdminOrFounder && (
+              <NavSection title="Phân tích">
+                <SidebarNavItem to="/analytics" icon="📈" label="Phân tích" />
+              </NavSection>
+            )}
+          </>
         )}
       </nav>
 

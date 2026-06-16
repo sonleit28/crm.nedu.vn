@@ -23,7 +23,8 @@ export function LoginPage() {
     if (status === 'idle') void hydrate()
   }, [status, hydrate])
 
-  if (status === 'authenticated') return <Navigate to="/dashboard" replace />
+  // '/' → HomeRedirect chọn landing theo role (finance-only → /finance).
+  if (status === 'authenticated') return <Navigate to="/" replace />
 
   const handleGoogle = () => {
     setSubmitting(true)

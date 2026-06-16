@@ -13,6 +13,8 @@ import { api } from '@shared/config/api-client'
 import { exportToCsv } from '@shared/utils/exportCsv'
 import { formatDateVN } from '@shared/utils/formatDateVN'
 import { useToastStore } from '@shared/stores/useToastStore'
+import { useAuthStore } from '@modules/auth/stores/useAuthStore'
+import { isFinanceViewerOnly } from '@shared/types/auth'
 import type { Payment } from '@shared/types/domain'
 import type { Paginated } from '@shared/types/api'
 
@@ -65,6 +67,8 @@ export function FinancePage() {
   const [filters, setFilters] = useState<PaymentFilters>(DEFAULT_FILTERS)
   const [exporting, setExporting] = useState(false)
   const pushToast = useToastStore((s) => s.push)
+  // Finance-only viewer: chỉ xem trên màn hình, không bulk-export PII học viên.
+  const financeOnly = isFinanceViewerOnly(useAuthStore((s) => s.user))
   const { data: summary, isLoading: loadingSummary } = useFinanceSummary(RANGE.month)
   const { data: paymentsData, isLoading: loadingPayments, isError, error, refetch } = usePayments(filters)
 
@@ -143,14 +147,16 @@ export function FinancePage() {
             Tổng quan thanh toán — dữ liệu đồng bộ từ payment gateway.
           </p>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleExport}
-          disabled={exporting}
-        >
-          {exporting ? 'Đang xuất...' : '⬇ Xuất Excel'}
-        </Button>
+        {!financeOnly && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            {exporting ? 'Đang xuất...' : '⬇ Xuất Excel'}
+          </Button>
+        )}
       </header>
 
       {/* KPI Grid */}

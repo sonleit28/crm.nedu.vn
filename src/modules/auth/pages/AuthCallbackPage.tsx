@@ -20,8 +20,11 @@ export function AuthCallbackPage() {
       return
     }
 
+    // Điều hướng về index ('/') để HomeRedirect chọn landing theo role
+    // (admin → /dashboard, finance-only viewer → /finance). Tránh hardcode
+    // /dashboard gây flash + request bị 403 cho role chỉ-xem-finance.
     acceptTokens({ access_token: access, refresh_token: refresh })
-      .then(() => navigate('/dashboard', { replace: true }))
+      .then(() => navigate('/', { replace: true }))
       .catch(() => navigate('/login?error=callback_failed', { replace: true }))
   }, [acceptTokens, navigate])
 

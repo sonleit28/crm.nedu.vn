@@ -1,5 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { NotificationBell } from './NotificationBell'
+import { useAuthStore } from '@modules/auth/stores/useAuthStore'
+import { isFinanceViewerOnly } from '@shared/types/auth'
 
 const PAGE_META: Record<string, { title: string; breadcrumb: string }> = {
   '/dashboard': { title: 'Tổng quan',    breadcrumb: 'Quản lý / Tổng quan' },
@@ -11,6 +13,8 @@ const PAGE_META: Record<string, { title: string; breadcrumb: string }> = {
 
 export function Topbar() {
   const { pathname } = useLocation()
+  const user = useAuthStore((s) => s.user)
+  const financeOnly = isFinanceViewerOnly(user)
   const meta = PAGE_META[pathname] ?? { title: 'CRM', breadcrumb: '' }
 
   return (
@@ -33,7 +37,7 @@ export function Topbar() {
           className="w-[240px] h-9 px-3 rounded-r bg-card2 border border-border text-[12px] text-text2 placeholder:text-text3 disabled:cursor-not-allowed"
           title="Phase 2"
         />
-        <NotificationBell />
+        {!financeOnly && <NotificationBell />}
         <button
           type="button"
           className="w-9 h-9 grid place-items-center rounded-r bg-card2 border border-border text-text2 hover:text-text"

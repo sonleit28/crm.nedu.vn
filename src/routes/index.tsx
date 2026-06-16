@@ -1,10 +1,11 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@shared/config/query-client'
 import { AppLayout } from '@shared/components/layout/AppLayout'
 import { RouteTracker } from '@shared/analytics/RouteTracker'
 import { ProtectedRoute } from './ProtectedRoute'
-import { RoleGate } from './RoleGate'
+import { RoleGate, HomeRedirect, BlockFinanceViewer } from './RoleGate'
+import { FINANCE_ROLES } from '@shared/types/auth'
 import { LoginPage } from '@modules/auth/pages/LoginPage'
 import { AuthCallbackPage } from '@modules/auth/pages/AuthCallbackPage'
 import { DashboardPage } from '@modules/dashboard/pages/DashboardPage'
@@ -29,22 +30,30 @@ export function AppRouter() {
           {/* Protected */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/pipeline" element={<PipelinePage />} />
-              <Route path="/contacts" element={<ContactsPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route index element={<HomeRedirect />} />
 
-              {/* Admin/Founder only */}
-              <Route element={<RoleGate allow={ADMIN_FOUNDER} />}>
+              {/* Workbench chung — finance-only viewer bị đẩy về /finance */}
+              <Route element={<BlockFinanceViewer />}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/pipeline" element={<PipelinePage />} />
+                <Route path="/contacts" element={<ContactsPage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+
+                {/* Admin/Founder only */}
+                <Route element={<RoleGate allow={ADMIN_FOUNDER} />}>
+                  <Route path="/analytics" element={<AnalyticsPage />} />
+                </Route>
+              </Route>
+
+              {/* Finance — admin/founder/owner + crm_finance_viewer */}
+              <Route element={<RoleGate allow={FINANCE_ROLES} />}>
                 <Route path="/finance" element={<FinancePage />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
               </Route>
             </Route>
           </Route>
 
-          {/* 404 → dashboard */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* 404 → role-aware home */}
+          <Route path="*" element={<HomeRedirect />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
